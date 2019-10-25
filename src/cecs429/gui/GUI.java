@@ -115,7 +115,7 @@ public class GUI  extends JPanel{
 					// If first word in string array is ':stem'
 					// Demos the stemming of 1 word
 					else if(special[0].equals(":stem")) {
-						Normalize normal = new Normalize();
+						Normalize normal = new Normalize("EN");
 						List<String> normalized = normal.processToken(special[1]);
 						String stemmedWord = "";
 						for (String term: normalized) {
@@ -139,7 +139,7 @@ public class GUI  extends JPanel{
 					else {
 						int count = 0;
 						BooleanQueryParser booleanQueryParser = new BooleanQueryParser();
-						Normalize normalize = new Normalize();
+						Normalize normalize = new Normalize("EN");
 				        for (Posting p : booleanQueryParser.parseQuery(query).getPostings(index, normalize)) { ////////MAGIC
 				            
 				        	results.append("Document ID: " + p.getDocumentId() + "\n");
@@ -222,7 +222,7 @@ public class GUI  extends JPanel{
     	JOptionPane.showMessageDialog(null, "Indexing Please Wait...");
     	PositionalInvertedIndex pInvIdx = new PositionalInvertedIndex(); // Positional Inverted index
         Iterable<Document> documentsIterable = corpus.getDocuments(); //Make documents iterable
-        Normalize normalize = new Normalize(); //WORD STEMMING
+        Normalize normalize = new Normalize("EN"); //WORD STEMMING
         HashSet<String> vocabulary = new HashSet<>();
         // Goes through the documents in the corpus
         for (Document doc : documentsIterable) {

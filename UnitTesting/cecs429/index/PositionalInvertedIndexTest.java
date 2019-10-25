@@ -32,7 +32,7 @@ class PositionalInvertedIndexTest {
     private static PositionalInvertedIndex indexCorpus(DocumentCorpus corpus) {
         PositionalInvertedIndex pInvIdx = new PositionalInvertedIndex(); //Inverted index
         Iterable<Document> documentsIterable = corpus.getDocuments(); //Make documents iterable
-        Normalize normalize = new Normalize(); //WORD STEMMING
+        Normalize normalize = new Normalize("EN"); //WORD STEMMING
         HashSet<String> vocabulary = new HashSet<>();
 
         for (Document doc : documentsIterable) {
