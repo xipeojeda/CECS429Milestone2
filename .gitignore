@@ -81,7 +81,6 @@ local.properties
 .idea/**/usage.statistics.xml
 .idea/**/dictionaries
 .idea/**/shelf
-
 # Generated files
 .idea/**/contentModel.xml
 
@@ -185,3 +184,7 @@ fabric.properties
 hs_err_pid*
 
 # End of https://www.gitignore.io/api/java,eclipse,intellij
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
+CECS429Milestone2.iml
