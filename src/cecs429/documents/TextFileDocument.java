@@ -56,4 +56,10 @@ public class TextFileDocument implements FileDocument {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public String getAuthor() {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

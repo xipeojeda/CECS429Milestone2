@@ -24,6 +24,7 @@ import cecs429.index.DiskIndexWriter;
 import cecs429.index.Index;
 import cecs429.index.PositionalInvertedIndex;
 import cecs429.index.Posting;
+import cecs429.index.Soundex;
 import cecs429.query.BooleanQueryParser;
 import cecs429.text.EnglishTokenStream;
 import cecs429.text.Normalize;
@@ -42,7 +43,7 @@ public class GUI  extends JPanel{
 	public GUI(){
 		
 		this.directory = selectDirectory();
-		this.corpus = DirectoryCorpus.loadTextDirectory(Paths.get(this.directory).toAbsolutePath(), ".txt"); // THIS IS FOR .json FILES
+		this.corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(this.directory).toAbsolutePath(), ".json"); // THIS IS FOR .json FILES
 		this.index = indexCorpus(corpus);
 		this.diw = new DiskIndexWriter(this.directory, this.index);
 		this.diw.writeIndex();
@@ -129,6 +130,10 @@ public class GUI  extends JPanel{
 					else if(textField.getText().equals(":index")) {
 						String selectNewIndex = selectDirectory();
 						changeDirectory(selectNewIndex);
+					}
+					//special query for author, to utilize soundex index
+					else if(textField.getText().equals(":author")) {
+						
 					}
 					// If first word is ':q' quit the program
 					else if(textField.getText().equals(":q")) {
@@ -250,6 +255,40 @@ public class GUI  extends JPanel{
             }
         }
         return pInvIdx;
+    }
+    
+    /*
+     * test for soundex index
+     */
+    
+    private static Soundex soundexCorpus(DocumentCorpus corpus) {
+    	// Display dialog box to user when indexCorpus is ran
+    	JOptionPane.showMessageDialog(null, "Indexing Please Wait...");
+    	Soundex soundex = new Soundex(); // Positional Inverted index
+        Iterable<Document> documentsIterable = corpus.getDocuments(); //Make documents iterable
+        Normalize normalize = new Normalize("EN"); //WORD STEMMING
+        HashSet<String> vocabulary = new HashSet<>();
+        // Goes through the documents in the corpus
+        for (Document doc : documentsIterable) {
+            EnglishTokenStream ets = new EnglishTokenStream(doc.getContent());  
+            for (String str : ets.getTokens()) {
+            	// Process strings
+                List<String> terms = normalize.processToken(str);
+                // Go through processed terms list and add each term to vocabulary and to the index	
+                for (String term: terms) {
+                    vocabulary.add(term);
+                    soundex.addCode(doc.getAuthor(), doc.getId());     
+                }
+                
+            }
+            try {
+                ets.close();
+            }
+            catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    	return soundex;
     }
 
 

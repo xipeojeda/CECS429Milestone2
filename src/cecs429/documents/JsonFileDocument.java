@@ -17,6 +17,7 @@ public class JsonFileDocument implements FileDocument {
     private int documentId;
     private Path documentPath;
     private String title;
+    private String author;
 
     public JsonFileDocument(int id, Path docPath) {
         documentId = id;
@@ -76,5 +77,31 @@ public class JsonFileDocument implements FileDocument {
 	public String getFileName() {
 		// TODO Auto-generated method stub
 		return documentPath.getFileName().toString();
+	}
+
+	/*
+	 * 
+	 */
+	public void setAuthor(String author) {
+		this.author = author;
+	}
+
+	@Override
+	public String getAuthor() {
+    	try (JsonReader jr = new JsonReader(new InputStreamReader(new FileInputStream(documentPath.toString())))){
+			Gson gson = new Gson();
+			JsonObject js = gson.fromJson(jr, JsonObject.class);
+			title = js.get("author").getAsString();
+			setTitle(title);
+			jr.close();
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    	
+		return title;
 	}
 }

@@ -22,4 +22,6 @@ public interface Document {
 	String getTitle();
 	
 	String getFileName();
+	
+	String getAuthor();
 }
