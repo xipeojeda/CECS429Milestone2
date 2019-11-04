@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -37,6 +38,8 @@ public class  DiskIndexWriter {
 				e.printStackTrace();
 			}
 		}
+		
+		
 	}
 	//Interface for sub-methods
 	public interface WriteIndexInterface{
@@ -61,13 +64,25 @@ public class  DiskIndexWriter {
 			public List<Long> createPostingBin(String path, Index index) {
 				//holds the posting positions
 				List<Long> postingPositions = new ArrayList<Long>();
+				
 				//keep track of current Position
 				long currentPos = 0;
 				DataOutputStream postingsBin = null;
+				
 				try {
-					BTreeDb postingsTree = new BTreeDb(path, "postingsTree"); //MOTHA TREE
 					//creating posting.bin in folder path
-					postingsBin = new DataOutputStream(new FileOutputStream(new File(path, "postings.bin")));
+					File file = new File(path, "postings.bin");
+				
+					postingsBin = new DataOutputStream(new FileOutputStream(file));
+					
+					//Get the correct directory path (Windows format)
+					String truePath = file.getParent();
+					truePath.replace("\\", "\\\\");
+					String temp = truePath + "\\";
+					
+					BTreeDb postingsTree = new BTreeDb(temp, "postingsTree"); //MOTHA TREE
+					
+					
 					//going through vocabulary
 					for(String term: index.getVocabulary()) {
 						//adding current positions to posting positions
@@ -124,8 +139,16 @@ public class  DiskIndexWriter {
 				long currentPos = 0;
 				DataOutputStream vocabBin = null;
 				try {
+					File vFile = new File(path, "vocab.txt");
+					//Get the correct directory path (Windows format)
+					String truePath = vFile.getParent();
+					truePath.replace("\\", "\\\\");
+					String temp = truePath + "\\";
+					
+					BTreeDb vocabTree = new BTreeDb(temp, "vocabTree"); //MOTHA TREE
+					
 					//create vocab.bin in folder path (saving as txt as per instructions say we can do) encoded in UTF-8
-					vocabBin = new DataOutputStream(new FileOutputStream(new File(path, "vocab.txt")));
+					vocabBin = new DataOutputStream(new FileOutputStream(vFile));
 					//loop through vocabulary
 					for(String term: index.getVocabulary()) {
 						//gets bytes from each term and add them to byte[]
@@ -135,10 +158,14 @@ public class  DiskIndexWriter {
 						//add current position to vocabPositions
 						vocabPositions.add(currentPos);
 						//increment current position from current terms utf8 length 
+						vocabTree.writeToDb(term, currentPos);
 						currentPos += utf8.length;
+						
+						System.out.println(vocabTree.getPosition("whale"));
 					}
 					
 					vocabBin.close();
+					
 				}catch(FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {

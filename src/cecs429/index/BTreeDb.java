@@ -10,15 +10,20 @@ public class BTreeDb {
     private String filePath;
     private String fileName;
     private DB db;
+    private BTreeMap<String, Long> map;
 
     public BTreeDb(String filePath, String fileName){
         this.filePath = filePath;
         this.fileName = fileName;
-        db =  DBMaker.fileDB(this.filePath).make();
+        db =  DBMaker.fileDB(this.filePath + this.fileName).make();
    }
 
     public void writeToDb(String term, Long position){
-        BTreeMap<String, Long> map = db.treeMap(this.fileName).keySerializer(Serializer.STRING).valueSerializer(Serializer.LONG).counterEnable().createOrOpen();
-        map.put(term, position);
+        this.map = db.treeMap(this.fileName).keySerializer(Serializer.STRING).valueSerializer(Serializer.LONG).counterEnable().createOrOpen();
+        this.map.put(term, position);
+    }
+    
+    public Long getPosition(String term) {
+    	return this.map.get(term);
     }
 }
