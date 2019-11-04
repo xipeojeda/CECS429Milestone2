@@ -11,7 +11,7 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiskIndexWriter {
+public class  DiskIndexWriter {
 	private String folderPath;
 	private Index index;
 	
@@ -65,6 +65,7 @@ public class DiskIndexWriter {
 				long currentPos = 0;
 				DataOutputStream postingsBin = null;
 				try {
+					BTreeDb postingsTree = new BTreeDb(path, "postingsTree"); //MOTHA TREE
 					//creating posting.bin in folder path
 					postingsBin = new DataOutputStream(new FileOutputStream(new File(path, "postings.bin")));
 					//going through vocabulary
@@ -75,7 +76,7 @@ public class DiskIndexWriter {
 						List<Posting> postings = index.getPostings(term);
 						//writing size to postings.bin
 						postingsBin.writeLong(postings.size());
-						
+						postingsTree.writeToDb(term, currentPos);
 						//4 bytes per posting
 						currentPos += 4;
 						
