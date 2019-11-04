@@ -111,7 +111,7 @@ public class  DiskIndexWriter {
 							}
 						}
 					}
-					
+					postingsTree.close();
 					postingsBin.close();
 				}
 				catch(FileNotFoundException e) {
@@ -163,7 +163,7 @@ public class  DiskIndexWriter {
 						
 						System.out.println(vocabTree.getPosition("whale"));
 					}
-					
+					vocabTree.close();
 					vocabBin.close();
 					
 				}catch(FileNotFoundException e) {
