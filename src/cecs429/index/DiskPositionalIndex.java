@@ -17,11 +17,6 @@ public class DiskPositionalIndex implements Index {
 
     @Override
     public List<String> getVocabulary() {
-
-
-
-
         return null;
-
     }
 }
