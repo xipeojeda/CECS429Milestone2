@@ -58,44 +58,26 @@ public class DiskPositionalIndex implements Index {
     		}
         	return null;
     }
-	
+	/*
+	 * 
+	 */
 	private long bTreeSearchVocab(String term){
-		long vListPosition = vocabDB.get(term);
-	      // do a binary search over the vocabulary, using the vocabTable and the file vocabList.
-	      int i = 0, j = mVocabTable.length / 2 - 1;
-	      while (i <= j) {
-	         try {
-	        	  int m = (i + j) / 2;
-	        	  int termLength;
-	             if (m == mVocabTable.length / 2 - 1) {
-	                 termLength = (int)(mVocabList.length() - mVocabTable[m*2]);
-	              }
-	              else {
-	                 termLength = (int) (mVocabTable[(m + 1) * 2] - vListPosition);
-	              }
-	            mVocabList.seek(vListPosition);
-
-	            byte[] buffer = new byte[termLength];
-	            mVocabList.read(buffer, 0, termLength);
-	            String fileTerm = new String(buffer, "ASCII");
-
-	            int compareValue = term.compareTo(fileTerm);
-	            if (compareValue == 0) {
-	               // found it!
-	               return mVocabTable[m * 2 + 1];
-	            }
-	            else if (compareValue < 0) {
-	               j = m - 1;
-	            }
-	            else {
-	               i = m + 1;
-	            }
-	         }
-	         catch (IOException ex) {
-	            System.out.println(ex.toString());
-	         }
-	      }
-	      return -1;
+		long vPos = vocabDB.get(term);
+		try {
+			RandomAccessFile tableFile = new RandomAccessFile("vocabTable.bin", "r");
+			tableFile.seek(vPos);
+			int value = tableFile.readInt();
+			tableFile.close();
+			return mVocabTable[value + 1];
+		} catch (FileNotFoundException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		
+		return -1;
 	}
     
     public List<Posting> readPostingsBin(RandomAccessFile postings, long pos){
@@ -111,7 +93,7 @@ public class DiskPositionalIndex implements Index {
 			byte[] buffer = new byte[8];
 			postings.read(buffer, 0, buffer.length);
 			
-			//use ByteBuffer to convert the 4 bytes to int
+			//use ByteBuffer to convert the 8 bytes to int
 			int docFreq = ByteBuffer.wrap(buffer).getInt();
 			
 			int docId = 0;
