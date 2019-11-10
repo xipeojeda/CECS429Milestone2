@@ -36,6 +36,7 @@ public class GUI  extends JPanel{
     private DocumentCorpus corpus;
     // DocumentCorpus corpus = DirectoryCorpus.loadTextDirectory(Paths.get(selectDirectory()).toAbsolutePath(), ".txt"); THIS IS FOR .txt FILES
     private Index index;
+    private Index sIndex;
     private String directory = "";
     private DiskIndexWriter diw;
     
@@ -45,10 +46,13 @@ public class GUI  extends JPanel{
 		this.directory = selectDirectory();
 		this.corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(this.directory).toAbsolutePath(), ".json"); // THIS IS FOR .json FILES
 		this.index = indexCorpus(corpus);
+		this.index = soundexCorpus(corpus);
 		this.diw = new DiskIndexWriter(this.directory, this.index);
-		this.diw.writeIndex();
+		
 	}
 	
+
+
 	/*
 	 *  GUI for special queries and general search
 	 */
@@ -132,8 +136,20 @@ public class GUI  extends JPanel{
 						changeDirectory(selectNewIndex);
 					}
 					//special query for author, to utilize soundex index
-					else if(textField.getText().equals(":author")) {
-						
+					else if(special[0].equals(":author")) {
+						int count = 0;
+						BooleanQueryParser booleanQueryParser = new BooleanQueryParser();
+						Normalize normalize = new Normalize("EN");
+				        for (Posting p : booleanQueryParser.parseQuery(query).getPostings(sIndex, normalize)) { ////////MAGIC
+				            results.append("Author: " + corpus.getDocument(p.getDocumentId()).getAuthor());
+				        	results.append("Document ID: " + p.getDocumentId() + "\n");
+				            results.append("File Name: " + corpus.getDocument(p.getDocumentId()).getFileName() + "\n");
+				            results.append("Title: " + corpus.getDocument(p.getDocumentId()).getTitle() + "\n");
+				            results.append("\n");
+				            count++;
+				        }
+				        // Prints the amount of results returned
+						results.append("Returned: " + count + "\n");
 					}
 					// If first word is ':q' quit the program
 					else if(textField.getText().equals(":q")) {
@@ -257,27 +273,27 @@ public class GUI  extends JPanel{
         return pInvIdx;
     }
     
-    /*
-     * test for soundex index
-     */
-    
-    private static Soundex soundexCorpus(DocumentCorpus corpus) {
-    	// Display dialog box to user when indexCorpus is ran
+	private static Soundex soundexCorpus(DocumentCorpus corpus2) {
+		// Display dialog box to user when indexCorpus is ran
     	JOptionPane.showMessageDialog(null, "Indexing Please Wait...");
     	Soundex soundex = new Soundex(); // Positional Inverted index
-        Iterable<Document> documentsIterable = corpus.getDocuments(); //Make documents iterable
+        Iterable<Document> documentsIterable = corpus2.getDocuments(); //Make documents iterable
         Normalize normalize = new Normalize("EN"); //WORD STEMMING
-        HashSet<String> vocabulary = new HashSet<>();
         // Goes through the documents in the corpus
         for (Document doc : documentsIterable) {
-            EnglishTokenStream ets = new EnglishTokenStream(doc.getContent());  
+            EnglishTokenStream ets = new EnglishTokenStream(doc.getContent());
+
+            int count = 0; //Keep track of position
+            
             for (String str : ets.getTokens()) {
             	// Process strings
                 List<String> terms = normalize.processToken(str);
                 // Go through processed terms list and add each term to vocabulary and to the index	
                 for (String term: terms) {
-                    vocabulary.add(term);
-                    soundex.addCode(doc.getAuthor(), doc.getId());     
+                    
+                    soundex.addCode(doc.getAuthor(), doc.getId());
+                    count++;
+                    
                 }
                 
             }
@@ -288,8 +304,7 @@ public class GUI  extends JPanel{
                 e.printStackTrace();
             }
         }
-    	return soundex;
+        return soundex;
     }
-
-
+	
 }

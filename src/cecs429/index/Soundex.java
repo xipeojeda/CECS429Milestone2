@@ -46,17 +46,23 @@ public class Soundex implements Index{
 	}
 	
 	public String toSoundex(String term) {
-		char [] temp = term.toString().toCharArray();
-		char firstLetter = temp[0];
+		System.out.println(term);
+		char [] temp = term.toUpperCase().toCharArray();
+		if(term.length() == 0) {
+			System.out.println("test");
+			return null;
+		}
+		String firstLetter = term.substring(0,1);
 		//converts letters to codes
 		for(int i = 0; i < temp.length; i++) {
 			switch(temp[i]) {
 			case 'B':
 			case 'F':
 			case 'P':
-			case 'V':
+			case 'V':{
 				temp[i] = '1';
 				break;
+			}
 			case 'C':
 			case 'G':
 			case 'J':
@@ -64,28 +70,35 @@ public class Soundex implements Index{
 			case 'Q':
 			case 'S':
 			case 'X':
-			case 'Z':
+			case 'Z':{
 				temp[i] = '2';
 				break;
+			}
 			case 'D':
-			case 'T':
+			case 'T':{
 				temp[i] = '3';
 				break;
-			case 'L': 
+			}
+			case 'L': {
 				temp[i] = '4';
 				break;
+			}
 			case 'M':
-			case 'N':
+			case 'N':{
 				temp[i] = '5';
 				break;
-			case 'R':
+			}
+			case 'R':{
 				temp[i] = '6';
 				break;
-			default:
+			}
+			default:{
 				temp[i] = '0';
 				break;
 			}
+			}
 		}
+		
 		
 		//remove duplicates
 		String output = "" + firstLetter;
@@ -94,6 +107,7 @@ public class Soundex implements Index{
 				output += temp[i];
 			}
 		}
+		
 		//padding with 0 or truncate
 		output = output + "0000";
 		return output.substring(0,4);

@@ -91,8 +91,8 @@ public class JsonFileDocument implements FileDocument {
     	try (JsonReader jr = new JsonReader(new InputStreamReader(new FileInputStream(documentPath.toString())))){
 			Gson gson = new Gson();
 			JsonObject js = gson.fromJson(jr, JsonObject.class);
-			title = js.get("author").getAsString();
-			setTitle(title);
+			author = js.get("author").getAsString();
+			setAuthor(author);
 			jr.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
@@ -102,6 +102,6 @@ public class JsonFileDocument implements FileDocument {
 			e.printStackTrace();
 		}
     	
-		return title;
+		return author;
 	}
 }
