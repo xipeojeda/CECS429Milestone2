@@ -14,10 +14,7 @@ public class RankedRetrieval implements Ranking, RankFormula {
         HashMap<Integer, Double> accMap = new HashMap<>();
         ArrayList<Accumalator> results = new ArrayList<>();
         String[] tokens = query.split(" ");
-        for (int i =0; i < tokens; i++)
-        {
-            ArrayList<Positional>
-        }
+
 
         return null;
     }
