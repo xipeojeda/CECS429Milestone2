@@ -6,6 +6,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import javax.swing.JButton;
@@ -21,6 +22,7 @@ import cecs429.documents.DirectoryCorpus;
 import cecs429.documents.Document;
 import cecs429.documents.DocumentCorpus;
 import cecs429.index.DiskIndexWriter;
+import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Index;
 import cecs429.index.PositionalInvertedIndex;
 import cecs429.index.Posting;
@@ -37,7 +39,7 @@ public class GUI  extends JPanel{
     private Index index;
     private String directory = "";
     private DiskIndexWriter diw;
-    
+      
 	// Default constructor
 	public GUI(){
 		
@@ -46,6 +48,7 @@ public class GUI  extends JPanel{
 		this.index = indexCorpus(corpus);
 		this.diw = new DiskIndexWriter(this.directory, this.index);
 		this.diw.writeIndex();
+		
 	}
 	
 	/*

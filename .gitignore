@@ -179,6 +179,8 @@ fabric.properties
 *.zip
 *.tar.gz
 *.rar
+*.xml
+
 
 *xml
 *.MF
@@ -192,3 +194,4 @@ hs_err_pid*
 .idea/modules.xml
 .idea/vcs.xml
 CECS429Milestone2.iml
+/target/
