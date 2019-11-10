@@ -8,10 +8,11 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DiskIndexWriter {
+public class  DiskIndexWriter {
 	private String folderPath;
 	private Index index;
 	
@@ -37,6 +38,8 @@ public class DiskIndexWriter {
 				e.printStackTrace();
 			}
 		}
+		
+		
 	}
 	//Interface for sub-methods
 	public interface WriteIndexInterface{
@@ -61,41 +64,44 @@ public class DiskIndexWriter {
 			public List<Long> createPostingBin(String path, Index index) {
 				//holds the posting positions
 				List<Long> postingPositions = new ArrayList<Long>();
+				
 				//keep track of current Position
 				long currentPos = 0;
 				DataOutputStream postingsBin = null;
+				
 				try {
 					//creating posting.bin in folder path
-					postingsBin = new DataOutputStream(new FileOutputStream(new File(path, "postings.bin")));
+					File file = new File(path, "postings.bin");
+				
+					postingsBin = new DataOutputStream(new FileOutputStream(file));
+					
 					//going through vocabulary
 					for(String term: index.getVocabulary()) {
 						//adding current positions to posting positions
 						postingPositions.add(currentPos);
 						//creating array list of postings from index
 						List<Posting> postings = index.getPostings(term);
-						//writing size to postings.bin
-						postingsBin.writeLong(postings.size());
-						
-						//4 bytes per posting
-						currentPos += 4;
-						
+						//writing size to postings.bin 
+						postingsBin.writeLong(postings.size());//document frequency
+						//8 bytes per posting
+						currentPos += 8;
 						//loop through postings to get docID gap
 						int lastDocID = 0;
 						for(Posting post: postings) {
 							int idGap = post.getDocumentId() - lastDocID;
 							lastDocID = post.getDocumentId();
 							postingsBin.writeInt(idGap);
+							
 						//looping through positions to get position gap
 							int lastPosition = 0;
 							for(int position: post.getPositions()) {
 								int posGap = position - lastPosition;
 								lastPosition = position;
 								postingsBin.writeInt(posGap);
-								currentPos += 4;
+								currentPos += 8;
 							}
 						}
 					}
-					
 					postingsBin.close();
 				}
 				catch(FileNotFoundException e) {
@@ -123,8 +129,16 @@ public class DiskIndexWriter {
 				long currentPos = 0;
 				DataOutputStream vocabBin = null;
 				try {
+					File vFile = new File(path, "vocab.txt");
+					//Get the correct directory path (Windows format)
+					String truePath = vFile.getParent();
+					truePath.replace("\\", "\\\\");
+					String temp = truePath + "\\";
+					
+					BTreeDb vocabTree = new BTreeDb(temp, "vocabTree"); //MOTHA TREE
+					
 					//create vocab.bin in folder path (saving as txt as per instructions say we can do) encoded in UTF-8
-					vocabBin = new DataOutputStream(new FileOutputStream(new File(path, "vocab.txt")));
+					vocabBin = new DataOutputStream(new FileOutputStream(vFile));
 					//loop through vocabulary
 					for(String term: index.getVocabulary()) {
 						//gets bytes from each term and add them to byte[]
@@ -134,10 +148,15 @@ public class DiskIndexWriter {
 						//add current position to vocabPositions
 						vocabPositions.add(currentPos);
 						//increment current position from current terms utf8 length 
+						vocabTree.writeToDb(term, currentPos);
 						currentPos += utf8.length;
+						
+						System.out.println(vocabTree.getPosition("whale"));
+						
 					}
-					
+					vocabTree.close();
 					vocabBin.close();
+					
 				}catch(FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
