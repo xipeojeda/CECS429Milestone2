@@ -7,7 +7,7 @@ import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.util.List;
 
-public class DiskPositionalindex implements Index{
+public class DiskPositionalIndex implements Index{
 	
 	private String mPath;
 	private RandomAccessFile mVocabList;
@@ -16,7 +16,7 @@ public class DiskPositionalindex implements Index{
 	
 	//Opens a disk positional index that was constructed
 	//in the given path
-	public DiskPositionalindex(String path) {
+	public DiskPositionalIndex(String path) {
 		try {
 			mPath = path;
 			mVocabList = new RandomAccessFile(new File(path, "vocab.txt"), "r");
