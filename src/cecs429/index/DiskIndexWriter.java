@@ -75,43 +75,33 @@ public class  DiskIndexWriter {
 				
 					postingsBin = new DataOutputStream(new FileOutputStream(file));
 					
-					//Get the correct directory path (Windows format)
-					String truePath = file.getParent();
-					truePath.replace("\\", "\\\\");
-					String temp = truePath + "\\";
-					
-					BTreeDb postingsTree = new BTreeDb(temp, "postingsTree"); //MOTHA TREE
-					
-					
 					//going through vocabulary
 					for(String term: index.getVocabulary()) {
 						//adding current positions to posting positions
 						postingPositions.add(currentPos);
 						//creating array list of postings from index
 						List<Posting> postings = index.getPostings(term);
-						//writing size to postings.bin
-						postingsBin.writeLong(postings.size());
-						postingsTree.writeToDb(term, currentPos);
-						//4 bytes per posting
-						currentPos += 4;
-						
+						//writing size to postings.bin 
+						postingsBin.writeLong(postings.size());//document frequency
+						//8 bytes per posting
+						currentPos += 8;
 						//loop through postings to get docID gap
 						int lastDocID = 0;
 						for(Posting post: postings) {
 							int idGap = post.getDocumentId() - lastDocID;
 							lastDocID = post.getDocumentId();
 							postingsBin.writeInt(idGap);
+							
 						//looping through positions to get position gap
 							int lastPosition = 0;
 							for(int position: post.getPositions()) {
 								int posGap = position - lastPosition;
 								lastPosition = position;
 								postingsBin.writeInt(posGap);
-								currentPos += 4;
+								currentPos += 8;
 							}
 						}
 					}
-					postingsTree.close();
 					postingsBin.close();
 				}
 				catch(FileNotFoundException e) {
@@ -162,6 +152,7 @@ public class  DiskIndexWriter {
 						currentPos += utf8.length;
 						
 						System.out.println(vocabTree.getPosition("whale"));
+						
 					}
 					vocabTree.close();
 					vocabBin.close();
