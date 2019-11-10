@@ -248,4 +248,8 @@ public class DiskPositionalIndex implements Index {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	public int getDocumentCount(){
+		return mFileNames.size();
+	}
 }
