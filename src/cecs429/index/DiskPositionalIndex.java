@@ -238,8 +238,10 @@ public class DiskPositionalIndex implements Index {
 		return fileNames;
 	}
 	
-	public List<String> getFileNames(){
-		return mFileNames;
+	public List<String> getFileNames(int docID){
+    	List<String> list = new ArrayList<>();
+    	list.add(mFileNames.get(docID));
+		return list;
 	}
 	
 	public String[] getVocab() {
