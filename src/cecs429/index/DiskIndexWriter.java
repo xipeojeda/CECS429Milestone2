@@ -10,12 +10,16 @@ import java.io.OutputStreamWriter;
 import java.nio.ByteBuffer;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class  DiskIndexWriter {
 	private String folderPath;
 	private Index index;
-	
+	private static ArrayList<Integer> docLengthList;
 
 	public DiskIndexWriter() {
 		// TODO Auto-generated constructor stub
@@ -29,6 +33,7 @@ public class  DiskIndexWriter {
 	public DiskIndexWriter(String folderPath, Index index) {
 		this.setIndex(index);
 		this.setFolderPath(folderPath + "\\index");
+		docLengthList = new ArrayList<>();
 		//creating directory
 		File directory = new File(getFolderPath());
 		if(!directory.exists()) {
@@ -46,6 +51,7 @@ public class  DiskIndexWriter {
 		List<Long> createPostingBin(String path, Index index);
 		List<Long> createVocabBin(String path, Index index);
 		void createVocabTable(String path, List<Long> vPos, List<Long> pPos);
+		void createWeightBin(String path, HashMap<String, Integer> index, long fileSize);
 	}
 	
 	/*
@@ -72,7 +78,11 @@ public class  DiskIndexWriter {
 				try {
 					//creating posting.bin in folder path
 					File file = new File(path, "postings.bin");
-				
+					String truePath = file.getParent();
+					truePath.replace("\\", "\\\\");
+					String temp = truePath + "\\";
+
+					BTreeDb postingsTree = new BTreeDb(temp, "postingsTree"); //MOTHA TREE
 					postingsBin = new DataOutputStream(new FileOutputStream(file));
 					
 					//going through vocabulary
@@ -83,6 +93,7 @@ public class  DiskIndexWriter {
 						List<Posting> postings = index.getPostings(term);
 						//writing size to postings.bin 
 						postingsBin.writeLong(postings.size());//document frequency
+						postingsTree.writeToDb(term, currentPos);
 						//8 bytes per posting
 						currentPos += 8;
 						//loop through postings to get docID gap
@@ -102,6 +113,7 @@ public class  DiskIndexWriter {
 							}
 						}
 					}
+					postingsTree.close();
 					postingsBin.close();
 				}
 				catch(FileNotFoundException e) {
@@ -131,12 +143,6 @@ public class  DiskIndexWriter {
 				try {
 					File vFile = new File(path, "vocab.txt");
 					//Get the correct directory path (Windows format)
-					String truePath = vFile.getParent();
-					truePath.replace("\\", "\\\\");
-					String temp = truePath + "\\";
-					
-					BTreeDb vocabTree = new BTreeDb(temp, "vocabTree"); //MOTHA TREE
-					
 					//create vocab.bin in folder path (saving as txt as per instructions say we can do) encoded in UTF-8
 					vocabBin = new DataOutputStream(new FileOutputStream(vFile));
 					//loop through vocabulary
@@ -148,15 +154,9 @@ public class  DiskIndexWriter {
 						//add current position to vocabPositions
 						vocabPositions.add(currentPos);
 						//increment current position from current terms utf8 length 
-						vocabTree.writeToDb(term, currentPos);
 						currentPos += utf8.length;
-						
-						System.out.println(vocabTree.getPosition("whale"));
-						
 					}
-					vocabTree.close();
 					vocabBin.close();
-					
 				}catch(FileNotFoundException e) {
 					e.printStackTrace();
 				} catch (IOException e) {
@@ -199,7 +199,53 @@ public class  DiskIndexWriter {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-			}	
+			}
+
+			@Override
+			public void createWeightBin(String path, HashMap<String, Integer> index, long fileSize) {
+				try {
+					double wdtSum = 0.0;
+					double tfsum = 0.0;
+
+					File weightBin = new File(path, "docWeights.bin");
+					FileOutputStream wFileOutput = null;
+
+					if (weightBin.exists()) {
+						wFileOutput = new FileOutputStream(weightBin, true);
+					}
+					else {
+						weightBin.createNewFile();
+						wFileOutput = new FileOutputStream(weightBin);
+					}
+
+					for (Map.Entry<String, Integer> term : index.entrySet()) {
+						tfsum += term.getValue();
+						double wdt = 1 + Math.log((double)term.getValue());
+						wdtSum += Math.pow(wdt, 2);
+					}
+
+					double ld = Math.sqrt(wdtSum);
+					byte[] docWeightBytes = ByteBuffer.allocate(8).putDouble(ld).array();
+
+					wFileOutput.write(docWeightBytes, 0, docWeightBytes.length);
+
+					double docLengthD = index.size();
+					docLengthList.add((int)docLengthD);
+					byte[] docLengthBytes = ByteBuffer.allocate(8).putDouble(docLengthD).array();
+					wFileOutput.write(docLengthBytes, 0, docLengthBytes.length);
+
+					double avgtf = tfsum/index.size();
+					byte[] docAvgBytes = ByteBuffer.allocate(8).putDouble(avgtf).array();
+
+					wFileOutput.write(docAvgBytes, 0, docAvgBytes.length);
+				}
+				catch (FileNotFoundException ex) {
+						ex.printStackTrace();
+				}
+				catch (IOException ex) {
+					ex.printStackTrace();
+				}
+			}
 		};
 		List<Long> vocabPositions = wii.createVocabBin(getFolderPath(), getIndex());
 		List<Long> postingPositions = wii.createPostingBin(getFolderPath(), getIndex());
