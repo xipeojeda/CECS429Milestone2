@@ -211,7 +211,12 @@ public class DiskPositionalIndex implements Index {
 			Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>(){
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-					return FileVisitResult.CONTINUE;
+
+					if ( path.equals(dir))
+					{
+						return FileVisitResult.CONTINUE;
+					}
+					return FileVisitResult.SKIP_SUBTREE;
 				}
 				
 				@Override
@@ -236,8 +241,10 @@ public class DiskPositionalIndex implements Index {
 		return fileNames;
 	}
 	
-	public List<String> getFileNames(){
-		return mFileNames;
+	public List<String> getFileNames(int docID){
+    	List<String> list = new ArrayList<>();
+    	list.add(mFileNames.get(docID));
+		return list;
 	}
 	
 	public String[] getVocab() {
