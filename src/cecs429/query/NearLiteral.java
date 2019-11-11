@@ -1,5 +1,6 @@
 package cecs429.query;
 
+import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Index;
 import cecs429.index.Posting;
 import cecs429.text.Normalize;
@@ -111,4 +112,29 @@ public class NearLiteral implements QueryComponent {
     public String toString() {
         return "\"" + String.join(" ", mTerms) + "\"";
     }
+	@Override
+	public List<Posting> getPostings(DiskPositionalIndex dpi, Normalize normal) {
+		  //creating result list
+        List<Posting> result = new ArrayList<>();
+        //temporary posting temp list
+        List<Posting> temp = new ArrayList<>();
+        //list to hold normalized terms
+        List<String> processedList = new ArrayList<>();
+        //traverse through list of terms and normalize
+        for(String s: mTerms) {
+            processedList.addAll(normal.processToken(s));
+        }
+        //if no terms return empty list
+        if(mTerms.size() == 0)
+            return result;
+        else
+            //add all postings of index 1
+            result.addAll(dpi.getPostings(processedList.get(0)));
+        // traverse through the amount of items in mTerms list
+        for(int i = 0; i < mTerms.size();i++) {
+            temp = dpi.getPostings(processedList.get(i)); //adding the postings of the normalized terms
+            result=positionalMerge(result,temp, x); //do the positional merge
+        }
+        return result;
+	}
 }

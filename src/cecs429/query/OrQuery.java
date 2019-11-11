@@ -1,5 +1,6 @@
 package cecs429.query;
 
+import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Index;
 import cecs429.index.Posting;
 import cecs429.text.Normalize;
@@ -89,5 +90,25 @@ public class OrQuery implements QueryComponent {
 		return "(" +
 		 String.join(" + ", mComponents.stream().map(c -> c.toString()).collect(Collectors.toList()))
 		 + " )";
+	}
+
+	@Override
+	public List<Posting> getPostings(DiskPositionalIndex dpi, Normalize normal) {
+		List<Posting> result = new ArrayList<>();
+		List<Posting> temp;
+		
+		// TODO: program the merge for an OrQuery, by gathering the postings of the composed QueryComponents and
+		// unioning the resulting postings.
+		if(mComponents.size() == 0)
+			return result;
+		else
+			result.addAll(mComponents.get(0).getPostings(dpi, normal));
+
+		for(int i = 0; i < mComponents.size();i++) {
+			temp = mComponents.get(i).getPostings(dpi, normal); //"OR" algorithm happens here
+			result = union(result,temp); //CALL HELPER METHOD
+		}
+
+		return result;
 	}
 }

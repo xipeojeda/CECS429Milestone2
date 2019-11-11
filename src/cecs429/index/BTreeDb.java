@@ -15,7 +15,7 @@ public class BTreeDb {
     public BTreeDb(String filePath, String fileName){
         this.filePath = filePath;
         this.fileName = fileName;
-        this.db =  DBMaker.fileDB(this.filePath + this.fileName).make();
+        
    }
 
     public void writeToDb(String term, Long position){
@@ -23,8 +23,16 @@ public class BTreeDb {
         this.map.put(term, position);
     }
     
+    public void makeDb() {
+    	this.db =  DBMaker.fileDB(this.filePath + this.fileName).make();
+    }
+    
     public Long getPosition(String term) {
     	return this.map.get(term);
+    }
+    
+    public DB getDB() {
+    	return this.db;
     }
     
     public void close() {

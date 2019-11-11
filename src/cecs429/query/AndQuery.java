@@ -1,5 +1,6 @@
 package cecs429.query;
 
+import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Index;
 import cecs429.index.Posting;
 import cecs429.text.Normalize;
@@ -74,5 +75,26 @@ public class AndQuery implements QueryComponent {
 	public String toString() {
 		return
 		 String.join(" ", mComponents.stream().map(c -> c.toString()).collect(Collectors.toList()));
+	}
+
+	@Override
+	public List<Posting> getPostings(DiskPositionalIndex dpi, Normalize normal) {
+		List<Posting> result = new ArrayList<>();
+		List<Posting> temp;
+
+		// TODO: program the merge for an AndQuery, by gathering the postings of the composed QueryComponents and
+		// intersecting the resulting postings.
+		if (mComponents.size() == 0)  //check if mComponents list is empty
+			return result;
+		else
+			result.addAll(mComponents.get(0).getPostings(dpi, normal)); //Get postings of first index of "mComponents"
+
+		//gather posting of QueryComponents and intersect with results list postings
+		for (int i = 0; i < mComponents.size(); i++) {
+			temp = mComponents.get(i).getPostings(dpi, normal); //"AND" algorithm happens here
+			result = intersection(result, temp); //CALL HELPER METHOD
+		}
+
+		return result;
 	}
 }

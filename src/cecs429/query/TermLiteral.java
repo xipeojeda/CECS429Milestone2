@@ -1,5 +1,6 @@
 package cecs429.query;
 
+import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Index;
 import cecs429.index.Posting;
 import cecs429.text.Normalize;
@@ -35,5 +36,16 @@ public class TermLiteral implements QueryComponent {
 	@Override
 	public String toString() {
 		return mTerm;
+	}
+
+	@Override
+	public List<Posting> getPostings(DiskPositionalIndex dpi, Normalize normal) {
+		List<String> processedTerms = normal.processToken(mTerm);
+		List<Posting> p = new ArrayList<>();
+		for(String s: processedTerms) {
+			p.addAll(dpi.getPostings(s));
+		}
+			
+		return p;
 	}
 }

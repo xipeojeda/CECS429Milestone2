@@ -37,6 +37,7 @@ public class DiskPositionalIndex implements Index {
 	private List<String> terms = null;
 	//private ConcurrentNavigableMap<String, Long> vocabDB;
 	private ConcurrentNavigableMap<String, Long> postingsDB;
+	private BTreeDb btdb;
 
 	private DB db;
 	
@@ -44,20 +45,25 @@ public class DiskPositionalIndex implements Index {
 	public DiskPositionalIndex(String path) {
 		try {
 			
-			mPath = path;
-			mVocabList = new RandomAccessFile(new File(path, "vocab.txt"), "r");
-			mPostings = new RandomAccessFile(new File(path, "postings.bin"), "r");
-			postingsDB = this.db.treeMap("postingsTree", Serializer.STRING, Serializer.LONG).open();
-			mVocabTable = readVocabTable(path);
-			mFileNames = readFileNames(path);
-			docWeights = new RandomAccessFile(new File(path, "docWeights.bin"), "r");
+			mPath = path + "index/";
+			String mapDbPath = mPath.replace("\\", "\\\\");
+			String temp = mapDbPath + "\\";
+			
+			mVocabList = new RandomAccessFile(new File(mPath, "vocab.txt"), "r");
+			mPostings = new RandomAccessFile(new File(mPath, "postings.bin"), "r");
+			//postingsDB = this.db.treeMap("postingsTree", Serializer.STRING, Serializer.LONG).open();
+			btdb = new BTreeDb(temp, "postingsTree");
+			db = btdb.getDB();
+			//mVocabTable = readVocabTable(mPath);
+			mFileNames = readFileNames(mPath);
+			docWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
 		}catch(FileNotFoundException e) {
 			System.out.println(e.toString());
 		}
 	}
 
 	public List<Posting> getPostings(String term, boolean positions) {
-    		long position = postingsDB.get(term);
+    		long position = btdb.getPosition(term);
     		if(position >= 0) {
     			if(positions == true)
     				return readPositionalPosting(mPostings, position);
@@ -167,6 +173,7 @@ public class DiskPositionalIndex implements Index {
 	private static long[] readVocabTable(String indexName) {
 		try {
 			long[] vocabTable;
+			
 			RandomAccessFile tableFile = new RandomAccessFile(new File(indexName, "vocabTable.bin"), "r");
 			
 			byte[] byteBuffer = new byte[8];

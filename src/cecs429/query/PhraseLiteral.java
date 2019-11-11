@@ -1,5 +1,6 @@
 package cecs429.query;
 
+import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Index;
 import cecs429.index.Posting;
 import cecs429.text.Normalize;
@@ -124,5 +125,33 @@ public class PhraseLiteral implements QueryComponent {
 	@Override
 	public String toString() {
 		return "\"" + String.join(" ", mTerms) + "\"";
+	}
+
+	@Override
+	public List<Posting> getPostings(DiskPositionalIndex dpi, Normalize normal) {
+		// TODO: program this method. Retrieve the postings for the individual terms in the phrase,
+		// and positional merge them together.
+
+		List<Posting> result = new ArrayList<>();
+		List<Posting> temp = new ArrayList<>();
+		List<String> processedList = new ArrayList<>();
+		for(String s: mTerms) {
+			processedList.addAll(normal.processToken(s));
+
+		}
+
+		//System.out.println("YOOOOOOOO " + mTerms.size());
+
+		if(mTerms.size() == 0)
+			return result;
+		else
+			result.addAll(dpi.getPostings(processedList.get(0)));
+
+		for(int i = 1; i < mTerms.size();i++) {
+			temp = dpi.getPostings(processedList.get(i)); //"POSITIONAL MERGE" happens here
+			result = positionalMerge(result,temp, i); //CALL HELPER METHOD
+		}
+
+		return result;
 	}
 }

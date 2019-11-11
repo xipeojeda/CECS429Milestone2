@@ -15,7 +15,7 @@ public class Normalize implements TokenProcessor
 
 	public List<String> processToken(String token) {
 		String newTokens = token;
-		List<String> tokens = new ArrayList();// Set a token list to be returned later
+		List<String> tokens = new ArrayList<>();// Set a token list to be returned later
 
 		//Block checks whether a token has a non alphanumeric at the beginning or end of the token and removes them
 		if (!Character.isLetterOrDigit(token.charAt(0)) || !Character.isLetterOrDigit(token.charAt(token.length()-1)))  {

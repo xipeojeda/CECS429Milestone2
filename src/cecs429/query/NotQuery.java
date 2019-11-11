@@ -1,5 +1,6 @@
 package cecs429.query;
 
+import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Index;
 import cecs429.index.Posting;
 import cecs429.text.Normalize;
@@ -65,4 +66,22 @@ public class NotQuery implements QueryComponent {
         return
                 String.join(" ", mComponents.stream().map(c -> c.toString()).collect(Collectors.toList()));
     }
+
+	@Override
+	public List<Posting> getPostings(DiskPositionalIndex dpi, Normalize normal) {
+        List<Posting> result = new ArrayList<>();
+        List<Posting> temp = new ArrayList<>();
+        List<Posting> temp2 = new ArrayList<>();
+        if (mComponents.size() == 0)  //check if mComponents list is empty
+            return temp2;
+        else
+            temp2.addAll(mComponents.get(0).getPostings(dpi,normal)); //Get postings of first index of "mComponents"
+        //gather posting of QueryComponents and intersect with results list postings
+        for (int i = 1; i < mComponents.size(); i++) {
+            temp = mComponents.get(i).getPostings(dpi,normal); //"AND NOT" algorithm happens here after getting the second component to be notted.
+            result = notIntersection(temp2,temp); //CALL HELPER METHOD
+        }
+
+        return result;
+	}
 }
