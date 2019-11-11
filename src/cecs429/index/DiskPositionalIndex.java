@@ -1,6 +1,6 @@
 package cecs429.index;
 
-import javafx.geometry.Pos;
+
 import org.jetbrains.annotations.TestOnly;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
