@@ -146,8 +146,8 @@ public class GUI  extends JPanel{
 						Normalize normalize = new Normalize("EN");
 				        for (Posting p : booleanQueryParser.parseQuery(query).getPostings(dpi, normalize)) { ////////MAGIC
 				        	results.append("Document ID: " + p.getDocumentId() + "\n");
-				            results.append("File Name: " + corpus.getDocument(p.getDocumentId()).getFileName() + "\n");
-				            results.append("Title: " + corpus.getDocument(p.getDocumentId()).getTitle() + "\n");
+				            //results.append("File Name: " + corpus.getDocument(p.getDocumentId()).getFileName() + "\n");
+				            //results.append("Title: " + corpus.getDocument(p.getDocumentId()).getTitle() + "\n");
 				            results.append("Positions: " + p.getPositions() + "\n");
 				            results.append("\n");
 				            count++;

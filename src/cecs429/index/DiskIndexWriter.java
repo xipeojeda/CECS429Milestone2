@@ -65,7 +65,9 @@ public class  DiskIndexWriter {
         docByteSize = new ArrayList<Double>();
 		
 	}
-	
+	/*
+	 * 
+	 */
 	public void buildIndex() {
 		SortedSet<String> vocabulary = new TreeSet<>();
 		indexFile(Paths.get(getFolderPath()), vocabulary, index);
@@ -73,11 +75,12 @@ public class  DiskIndexWriter {
 		buildCorpusSizeFile(getFolderPath());
 		buildWeight(getFolderPath());
 	}
-	
+	/*
+	 * 
+	 */
 	private void buildWeight(String folderPath) {
 		// TODO Auto-generated method stub
 		FileOutputStream weightFile = null;
-		
 		try {
 			weightFile = new FileOutputStream(new File(folderPath, "docWeights.bin"));
 			for(int docID = 0; docID < docTermFrequency.size(); docID++) {
@@ -85,20 +88,30 @@ public class  DiskIndexWriter {
 				double avgTermFrequency = 0;
 				
 				for(Integer tf: docTermFrequency.get(docID).values()) {
-					double termWeight = 1 + (Math.log(tf));
+					double termWeight = 1 + (Math.log(tf)); //wdt
 					docWeight += Math.pow(termWeight, 2);
 					avgTermFrequency += tf;
 				}
-				
+				//Writing wdt to file
 				docWeight = Math.sqrt(docWeight);
 				byte[] docWeightByte = ByteBuffer.allocate(8).putDouble(docWeight).array();
-				
 				weightFile.write(docWeightByte, 0, docWeightByte.length);
 					
+				// Write document length to file
+				double length = docLength.get(docID);
+				byte[] docLengthByte = ByteBuffer.allocate(8).putDouble(length).array();
+				weightFile.write(docLengthByte, 0, docLengthByte.length);
+				
+				// Write document size to file
+				double byteSize = docByteSize.get(docID);
+				byte[] docSizeByte = ByteBuffer.allocate(8).putDouble(byteSize).array();
+				weightFile.write(docSizeByte, 0, docSizeByte.length);
+				
+				//write avg tf count to file
 				avgTermFrequency /= docTermFrequency.get(docID).keySet().size();
 				byte[] avgtfByte = ByteBuffer.allocate(8).putDouble(avgTermFrequency).array();
 				weightFile.write(avgtfByte, 0, avgtfByte.length);
-			
+			}
 				double avgDocLength = 0;
 				for(int dLength: docLength) {
 					avgDocLength += dLength;
@@ -107,8 +120,7 @@ public class  DiskIndexWriter {
 				byte[] avgDocLengthByte = ByteBuffer.allocate(8).putDouble(avgDocLength).array();
 				weightFile.write(avgDocLengthByte, 0, avgDocLengthByte.length);
 				
-				weightFile.close();
-			}
+			weightFile.close();
 		} catch (FileNotFoundException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -124,7 +136,9 @@ public class  DiskIndexWriter {
 		}
 		
 	}
-
+	/*
+	 * 
+	 */
 	private void buildCorpusSizeFile(String folderPath) {
 		FileOutputStream corpusFile = null;
 		
@@ -141,13 +155,17 @@ public class  DiskIndexWriter {
 			e.printStackTrace();
 		}
 	}
-
+	/*
+	 * 
+	 */
 	private void buildIndexForDirectory(Index index, String folderPath) {
 		long[] vPos = new long[index.getVocabulary().size()];
 		buildVocabFile(folderPath, index.getVocabulary(), vPos, "vocab.bin");
 		buildPostingFile(folderPath, index, index.getVocabulary(), vPos);
 	}
-	
+	/*
+	 * 
+	 */
 	private static void buildPostingFile(String folderPath, Index index, List<String> vocab, long[] vPos) {
 		FileOutputStream postingsFile = null;
 		try {
@@ -156,8 +174,9 @@ public class  DiskIndexWriter {
 			String truePath = file.getParent();
 			truePath.replace("\\", "\\\\");
 			String temp = truePath + "\\";
-
+			// Creating BTreeDb object
 			BTreeDb postingsTree = new BTreeDb(temp, "postingsTree"); //MOTHA TREE
+			// Making tree
 			postingsTree.makeDb();
 			postingsFile = new FileOutputStream(file);
 			FileOutputStream vocabTable = new FileOutputStream(new File(folderPath, "vocabTable.bin"));
@@ -173,6 +192,9 @@ public class  DiskIndexWriter {
 				
 				byte[] pPosBytes = ByteBuffer.allocate(8).putLong(postingsFile.getChannel().position()).array();
 				vocabTable.write(pPosBytes,0, pPosBytes.length);
+				
+				// Writing to db in form of string and long
+				//term and pPosition ????
 				postingsTree.writeToDb(s, postingsFile.getChannel().position());
 				
 				byte[] docFreqBytes = ByteBuffer.allocate(4).putInt(postings.size()).array();
@@ -212,7 +234,9 @@ public class  DiskIndexWriter {
 			}
 		}
 	}
-	
+	/*
+	 * 
+	 */
 	private static void buildVocabFile(String folderPath, List<String> vocab, long[] vPos, String file) {
 		OutputStreamWriter vocabList = null;
 		
@@ -248,7 +272,9 @@ public class  DiskIndexWriter {
 		}
 		
 	}
-
+	/*
+	 * 
+	 */
 	private void indexFile(Path path, SortedSet<String> vocab, Index index) {
 		// TODO Auto-generated method stub
         try {
@@ -289,7 +315,9 @@ public class  DiskIndexWriter {
             System.out.println(ex.toString());
         }
 	}
-	
+	/*
+	 * 
+	 */
 	 private int indexFile(File file, Index index, SortedSet<String> vocab, int docID) {
 		List<String> terms;
 		try {
@@ -318,9 +346,6 @@ public class  DiskIndexWriter {
 			
 			docLength.add(position);
 			
-			
-			
-
 		}catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}
