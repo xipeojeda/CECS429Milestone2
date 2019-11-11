@@ -36,7 +36,7 @@ import cecs429.text.Normalize;
 
 public class  DiskIndexWriter {
 	private String folderPath;
-	private PositionalInvertedIndex index;
+	private Index index;
 	private List<Map<String, Integer>> docTermFrequency; // term frequencies for a document
 	private ArrayList<Integer> docLength;
 	private List<Double> docByteSize; // byte size of each document
@@ -48,7 +48,7 @@ public class  DiskIndexWriter {
 	 * @param folderPath Folder where to write Index
 	 * @param index 
 	 */
-	public DiskIndexWriter(String folderPath, PositionalInvertedIndex index) {
+	public DiskIndexWriter(String folderPath, Index index) {
 		this.setIndex(index);
 		this.setFolderPath(folderPath + "index");
 		//creating directory
@@ -142,16 +142,24 @@ public class  DiskIndexWriter {
 		}
 	}
 
-	private void buildIndexForDirectory(PositionalInvertedIndex index, String folderPath) {
+	private void buildIndexForDirectory(Index index, String folderPath) {
 		long[] vPos = new long[index.getVocabulary().size()];
 		buildVocabFile(folderPath, index.getVocabulary(), vPos, "vocab.bin");
 		buildPostingFile(folderPath, index, index.getVocabulary(), vPos);
 	}
 	
-	private static void buildPostingFile(String folderPath, PositionalInvertedIndex index, List<String> vocab, long[] vPos) {
+	private static void buildPostingFile(String folderPath, Index index, List<String> vocab, long[] vPos) {
 		FileOutputStream postingsFile = null;
 		try {
-			postingsFile = new FileOutputStream(new File(folderPath, "postings.bin"));
+			File file = new File(folderPath, "postings.bin");
+			
+			String truePath = file.getParent();
+			truePath.replace("\\", "\\\\");
+			String temp = truePath + "\\";
+
+			BTreeDb postingsTree = new BTreeDb(temp, "postingsTree"); //MOTHA TREE
+			postingsTree.makeDb();
+			postingsFile = new FileOutputStream(file);
 			FileOutputStream vocabTable = new FileOutputStream(new File(folderPath, "vocabTable.bin"));
 			
 			byte[] tSize = ByteBuffer.allocate(4).putInt(vocab.size()).array();
@@ -165,6 +173,7 @@ public class  DiskIndexWriter {
 				
 				byte[] pPosBytes = ByteBuffer.allocate(8).putLong(postingsFile.getChannel().position()).array();
 				vocabTable.write(pPosBytes,0, pPosBytes.length);
+				postingsTree.writeToDb(s, postingsFile.getChannel().position());
 				
 				byte[] docFreqBytes = ByteBuffer.allocate(4).putInt(postings.size()).array();
 				postingsFile.write(docFreqBytes, 0, docFreqBytes.length);
@@ -190,6 +199,7 @@ public class  DiskIndexWriter {
 			}
 			vocabTable.close();
 			postingsFile.close();
+			postingsTree.close();
 		}catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}catch(IOException e) {
@@ -239,7 +249,7 @@ public class  DiskIndexWriter {
 		
 	}
 
-	private void indexFile(Path path, SortedSet<String> vocab, PositionalInvertedIndex index) {
+	private void indexFile(Path path, SortedSet<String> vocab, Index index) {
 		// TODO Auto-generated method stub
         try {
             Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
@@ -280,12 +290,12 @@ public class  DiskIndexWriter {
         }
 	}
 	
-	 private int indexFile(File file, PositionalInvertedIndex index, SortedSet<String> vocab, int docID) {
+	 private int indexFile(File file, Index index, SortedSet<String> vocab, int docID) {
 		List<String> terms;
 		try {
 			Gson gson = new Gson();
 			JsonFileDocument doc;
-			
+			PositionalInvertedIndex pii = new PositionalInvertedIndex();
 			vocab = new TreeSet<>();
 			docTermFrequency.add(new HashMap<String, Integer>());
 			JsonReader reader = new JsonReader(new FileReader(file));
@@ -298,7 +308,7 @@ public class  DiskIndexWriter {
 				
 				for(String term: terms) {
 					vocab.add(term);
-					index.addTerm(term, docID, position);
+					pii.addTerm(term, docID, position);
 					int termFrequency = docTermFrequency.get(docID).containsKey(term) ? docTermFrequency.get(docID).get(terms): 0;
 					docTermFrequency.get(docID).put(term, termFrequency + 1);
 					position++;
@@ -325,7 +335,7 @@ public class  DiskIndexWriter {
 	public Index getIndex() {
 		return index;
 	}
-	public void setIndex(PositionalInvertedIndex index) {
+	public void setIndex(Index index) {
 		this.index = index;
 	}
 	public String getFolderPath() {

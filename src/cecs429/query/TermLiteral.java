@@ -43,7 +43,7 @@ public class TermLiteral implements QueryComponent {
 		List<String> processedTerms = normal.processToken(mTerm);
 		List<Posting> p = new ArrayList<>();
 		for(String s: processedTerms) {
-			p.addAll(dpi.getPostings(s));
+			p.addAll(dpi.getPostings(s,false));
 		}
 			
 		return p;

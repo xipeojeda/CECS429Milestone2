@@ -48,13 +48,12 @@ public class DiskPositionalIndex implements Index {
 			mPath = path + "index/";
 			String mapDbPath = mPath.replace("\\", "\\\\");
 			String temp = mapDbPath + "\\";
-			
-			mVocabList = new RandomAccessFile(new File(mPath, "vocab.txt"), "r");
+			mVocabList = new RandomAccessFile(new File(mPath, "vocab.bin"), "r");
 			mPostings = new RandomAccessFile(new File(mPath, "postings.bin"), "r");
 			//postingsDB = this.db.treeMap("postingsTree", Serializer.STRING, Serializer.LONG).open();
 			btdb = new BTreeDb(temp, "postingsTree");
 			db = btdb.getDB();
-			//mVocabTable = readVocabTable(mPath);
+			mVocabTable = readVocabTable(mPath);
 			mFileNames = readFileNames(mPath);
 			docWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
 		}catch(FileNotFoundException e) {

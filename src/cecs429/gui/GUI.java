@@ -40,15 +40,13 @@ public class GUI  extends JPanel{
     private DiskPositionalIndex dpi;
     private String directory = "";
     private DiskIndexWriter diw;
-    private PositionalInvertedIndex pii;
       
 	// Default constructor
 	public GUI(){
-		pii = new PositionalInvertedIndex();
 		this.directory = selectDirectory();
-		this.corpus = DirectoryCorpus.loadTextDirectory(Paths.get(this.directory).toAbsolutePath(), ".txt"); // THIS IS FOR .json FILES
+		this.corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(this.directory).toAbsolutePath(), ".json"); // THIS IS FOR .json FILES
 		this.index = indexCorpus(corpus);
-		this.diw = new DiskIndexWriter(this.directory, pii);
+		this.diw = new DiskIndexWriter(this.directory, this.index);
 		this.diw.buildIndex();
 		this.dpi = new DiskPositionalIndex(this.directory);
 		
@@ -147,7 +145,6 @@ public class GUI  extends JPanel{
 						BooleanQueryParser booleanQueryParser = new BooleanQueryParser();
 						Normalize normalize = new Normalize("EN");
 				        for (Posting p : booleanQueryParser.parseQuery(query).getPostings(dpi, normalize)) { ////////MAGIC
-				            
 				        	results.append("Document ID: " + p.getDocumentId() + "\n");
 				            results.append("File Name: " + corpus.getDocument(p.getDocumentId()).getFileName() + "\n");
 				            results.append("Title: " + corpus.getDocument(p.getDocumentId()).getTitle() + "\n");
