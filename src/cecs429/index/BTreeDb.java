@@ -25,6 +25,7 @@ public class BTreeDb {
     
     public void makeDb() {
     	this.db =  DBMaker.fileDB(this.filePath + this.fileName).make();
+    
     }
     
     public Long getPosition(String term) {

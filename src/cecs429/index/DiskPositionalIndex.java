@@ -37,8 +37,6 @@ public class DiskPositionalIndex implements Index {
 	private List<String> terms = null;
 	//private ConcurrentNavigableMap<String, Long> vocabDB;
 	private ConcurrentNavigableMap<String, Long> postingsDB;
-	private BTreeDb btdb;
-
 	private DB db;
 	
 	
@@ -50,9 +48,9 @@ public class DiskPositionalIndex implements Index {
 			String temp = mapDbPath + "\\";
 			mVocabList = new RandomAccessFile(new File(mPath, "vocab.bin"), "r");
 			mPostings = new RandomAccessFile(new File(mPath, "postings.bin"), "r");
-			//postingsDB = this.db.treeMap("postingsTree", Serializer.STRING, Serializer.LONG).open();
-			btdb = new BTreeDb(temp, "postingsTree");
-			db = btdb.getDB();
+			db = DBMaker.fileDB(temp + "postingsTree").make();
+			postingsDB = this.db.treeMap("postingsTree", Serializer.STRING, Serializer.LONG).open();
+			
 			mVocabTable = readVocabTable(mPath);
 			mFileNames = readFileNames(mPath);
 			docWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
@@ -62,7 +60,7 @@ public class DiskPositionalIndex implements Index {
 	}
 
 	public List<Posting> getPostings(String term, boolean positions) {
-    		long position = btdb.getPosition(term);
+    		long position = postingsDB.get(term);
     		if(position >= 0) {
     			if(positions == true)
     				return readPositionalPosting(mPostings, position);
