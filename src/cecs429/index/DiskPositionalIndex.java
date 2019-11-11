@@ -1,5 +1,6 @@
 package cecs429.index;
 
+import javafx.geometry.Pos;
 import org.jetbrains.annotations.TestOnly;
 import org.mapdb.BTreeMap;
 import org.mapdb.DB;
@@ -22,6 +23,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.NavigableSet;
 import java.util.concurrent.ConcurrentNavigableMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class DiskPositionalIndex implements Index {
@@ -32,7 +35,9 @@ public class DiskPositionalIndex implements Index {
 	private long[] mVocabTable;
 	private List<String> mFileNames;
 	private List<String> terms = null;
-	private ConcurrentNavigableMap<String, Long> vocabDB;
+	//private ConcurrentNavigableMap<String, Long> vocabDB;
+	private ConcurrentNavigableMap<String, Long> postingsDB;
+
 	private DB db;
 	
 	
@@ -42,7 +47,7 @@ public class DiskPositionalIndex implements Index {
 			mPath = path;
 			mVocabList = new RandomAccessFile(new File(path, "vocab.txt"), "r");
 			mPostings = new RandomAccessFile(new File(path, "postings.bin"), "r");
-			vocabDB = this.db.treeMap("vocabTree", Serializer.STRING, Serializer.LONG).open();
+			postingsDB = this.db.treeMap("postingsTree", Serializer.STRING, Serializer.LONG).open();
 			mVocabTable = readVocabTable(path);
 			mFileNames = readFileNames(path);
 			docWeights = new RandomAccessFile(new File(path, "docWeights.bin"), "r");
@@ -52,39 +57,20 @@ public class DiskPositionalIndex implements Index {
 	}
 
 	public List<Posting> getPostings(String term, boolean positions) {
-    		long position = bTreeSearchVocab(term);
+    		long position = postingsDB.get(term);
     		if(position >= 0) {
-    			return readPostingsBin(mPostings, position);
+    			if(positions == true)
+    				return readPositionalPosting(mPostings, position);
+    			else
+    				return readPostingsBin(mPostings, position);
     		}
         	return null;
     }
 	/*
 	 * 
 	 */
-	private long bTreeSearchVocab(String term){
-		long vPos = vocabDB.get(term);
-		try {
-			RandomAccessFile tableFile = new RandomAccessFile("vocabTable.bin", "r");
-			tableFile.seek(vPos);
-			int value = tableFile.readInt();
-			tableFile.close();
-			return mVocabTable[value + 1];
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		
-		return -1;
-	}
-    
+
     public List<Posting> readPostingsBin(RandomAccessFile postings, long pos){
-   
-    	List<Posting> postingsList = new ArrayList<Posting>();
-    	
-    	
     	try {
     		//seek to the position where postings start
 			postings.seek(pos);
@@ -95,37 +81,28 @@ public class DiskPositionalIndex implements Index {
 			
 			//use ByteBuffer to convert the 8 bytes to int
 			int docFreq = ByteBuffer.wrap(buffer).getInt();
+
+			int lastDocID = 0;
+
+			ArrayList<Posting> posList = new ArrayList<>();
 			
-			int docId = 0;
-			int lDocId = 0;
-			
-			byte docIdsBuffer[] = new byte[8];
-			byte positionBuffer[]= new byte[8];
-			byte wdtBuffer[] = new byte[8];
-			
-			for(int docIdIndex = 0; docIdIndex < docFreq; docIdIndex++) {
-				postings.read(docIdsBuffer,0,docIdsBuffer.length);
-				docId = ByteBuffer.wrap(docIdsBuffer).getInt() + lDocId;
-				
-				postings.read(wdtBuffer, 0, wdtBuffer.length);
-				double wdt = ByteBuffer.wrap(wdtBuffer).getDouble();
-				buffer = new byte[8];
-				
-				postings.read(buffer, 0, buffer.length);
-				int termFreq = ByteBuffer.wrap(buffer).getInt();
-				
-				int[] positions = new int[termFreq];
-				
-				for(int positionIndex = 0; positionIndex < termFreq; positionIndex++) {
-					postings.read(positionBuffer, 0, positionBuffer.length);
-					positions[positionIndex] = ByteBuffer.wrap(positionBuffer).getInt();
-				}
-				lDocId = docId;
-				Posting post = new Posting(docId,Arrays.stream(positions).boxed().collect(Collectors.toList()), wdt);
-				postingsList.add(post);
+			for(int i = 0; i < docFreq; i++) {
+				byte[] docBuffer = new byte[8];
+				postings.read(docBuffer,0,docBuffer.length);
+				int docID = ByteBuffer.wrap(docBuffer).getInt() + lastDocID;
+				lastDocID = docID;
+
+				byte[] tfBuffer = new byte[8];
+				postings.read(tfBuffer, 0, tfBuffer.length);
+
+				int termFreq = ByteBuffer.wrap(tfBuffer).getInt();
+				postings.skipBytes(termFreq * 4);
+
+				Posting post = new Posting(docID, termFreq);
+				posList.add(post);
 			}
 			
-			return postingsList;
+			return posList;
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -133,6 +110,50 @@ public class DiskPositionalIndex implements Index {
     	
 		return null;
     }
+
+    public List<Posting> readPositionalPosting(RandomAccessFile postings, long position){
+		try{
+			postings.seek(position);
+			byte[] buffer = new byte[8];
+			postings.read(buffer,0,buffer.length);
+
+			int documentFreq = ByteBuffer.wrap(buffer).getInt();
+
+			int lastDocID = 0;
+			int lastPosID = 0;
+			ArrayList<Posting> posList = new ArrayList<>();
+
+			for(int i = 0; i < documentFreq; i++){
+				ArrayList<Integer> positions = new ArrayList<>();
+				byte[] docBuffer = new byte[8];
+				postings.read(docBuffer, 0, docBuffer.length);
+
+				int docID = ByteBuffer.wrap(docBuffer).getInt() + lastDocID;
+				lastDocID = docID;
+
+				byte[] tfBuffer = new byte[8];
+				postings.read(tfBuffer, 0, tfBuffer.length);
+
+				int termFreq = ByteBuffer.wrap(tfBuffer).getInt();
+
+				for(int j = 0; j < termFreq; j++){
+					byte[] posBuffer = new byte[8];
+					postings.read(posBuffer, 0, posBuffer.length);
+					int pos = ByteBuffer.wrap(posBuffer).getInt() + lastPosID;
+					lastPosID = pos;
+					positions.add(pos);
+				}
+
+				Posting post = new Posting(docID, termFreq, positions);
+				posList.add(post);
+			}
+
+			return  posList;
+		}catch(IOException e){
+			e.printStackTrace();
+		}
+		return null;
+	}
 
     @Override
     public List<String> getVocabulary() {
@@ -248,8 +269,46 @@ public class DiskPositionalIndex implements Index {
 		// TODO Auto-generated method stub
 		return null;
 	}
-	
+
 	public int getDocumentCount(){
 		return mFileNames.size();
 	}
+
+	private double findDocWeight(int documentID,
+								 RandomAccessFile docWeightsFile, int offset) {
+		try {
+			docWeightsFile.seek(documentID*32+offset);
+			byte[] buffer = new byte[8];
+			docWeightsFile.read(buffer, 0, buffer.length);
+
+			return ByteBuffer.wrap(buffer).getDouble();
+		} catch (IOException ex) {
+			ex.printStackTrace();
+		}
+
+		return 0.0;
+	}
+
+
+
+	public double getDocWeight(int docID) {
+    	return findDocWeight(docID, docWeights, 0);
+	}
+
+	public double getDocLength(int documentID) {
+		return findDocWeight(documentID, docWeights, 8);
+	}
+
+	public double getDocByteSize(int documentID) {
+		return findDocWeight(documentID, docWeights, 16);
+	}
+
+	public double getAverageTermFreq(int documentID) {
+		return findDocWeight(documentID, docWeights, 24);
+	}
+
+	public double getAverageDocLength() {
+		return findDocWeight(mFileNames.size(), docWeights, 0);
+	}
+
 }
