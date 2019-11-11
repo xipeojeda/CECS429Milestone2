@@ -213,7 +213,12 @@ public class DiskPositionalIndex implements Index {
 			Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>(){
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-					return FileVisitResult.CONTINUE;
+
+					if ( path.equals(dir))
+					{
+						return FileVisitResult.CONTINUE;
+					}
+					return FileVisitResult.SKIP_SUBTREE;
 				}
 				
 				@Override
