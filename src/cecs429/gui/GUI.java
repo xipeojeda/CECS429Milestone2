@@ -151,7 +151,7 @@ public class GUI  extends JPanel{
 						for (Accumalator a : rankedRetrieval.rankAlgorithm(query, dpi)) {
 							/*
 				        	results.append("Document ID: " + p.getDocumentId() + "\n");
-				            results.append("File Name: " + corpus.getDocument(p.getDocumentId()).getFileName() + "\n");
+				            //results.append("File Name: " + corpus.getDocument(p.getDocumentId()).getFileName() + "\n");
 				            //results.append("Title: " + corpus.getDocument(p.getDocumentId()).getTitle() + "\n");
 				            results.append("Positions: " + p.getPositions() + "\n");
 				            results.append("\n");
