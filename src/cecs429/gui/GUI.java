@@ -53,9 +53,9 @@ public class GUI  extends JPanel{
 			langOp="en";
 		else if(temp.equals("french")||temp.equals("French"))
 			langOp="fr";
-		if(jsonFiles(this.directory).get(1).endsWith(".json"))
+		if(jsonFiles(this.directory).get(0).endsWith(".json"))
 			this.corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(this.directory).toAbsolutePath(), ".json");// THIS IS FOR .json FILES
-		else if(!jsonFiles(this.directory).get(1).endsWith(".json"))
+		else if(!jsonFiles(this.directory).get(0).endsWith(".json"))
 			this.corpus = DirectoryCorpus.loadTextDirectory(Paths.get(this.directory).toAbsolutePath(), ".txt"); // THIS IS FOR .txt FILES
 		this.index = indexCorpus(corpus);
 		this.diw = new DiskIndexWriter(this.directory, this.index,langOp);
@@ -191,7 +191,7 @@ public class GUI  extends JPanel{
 				            results.append("\n");
 				            */
 				            
-							
+							count++;
 							results.append("Doc ID: " + a.getDocID()+ " -- " + a.getAccumulator() + "\n");
 						}
 				        // Prints the amount of results returned
@@ -312,15 +312,22 @@ public class GUI  extends JPanel{
     private static List<String> jsonFiles(String directory) {
     	  List<String> textFiles = new ArrayList<String>();
     	  File dir = new File(directory);
+    	  int i = 0;
+    	  while(i < 1) {
     	  for (File file : dir.listFiles()) {
     	    if (file.getName().endsWith((".json"))) {
     	      textFiles.add(file.getName());
+    	      break;
     	    }
-    	    else
+    	    else {
     	    	textFiles.add(file.getName());
+    	    	break;
+    	    }
+    	   
     	  }
-    	  return textFiles;
+    	  i++;
     	}
-
+		return textFiles;
+    }
 
 }
