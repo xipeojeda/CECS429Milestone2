@@ -58,7 +58,9 @@ public class DiskPositionalIndex implements Index {
 			System.out.println(e.toString());
 		}
 	}
-
+	/*
+	 * 
+	 */
 	public List<Posting> getPostings(String term, boolean positions) {
     		long position = postingsDB.get(term);
     		if(position >= 0) {
@@ -205,18 +207,17 @@ public class DiskPositionalIndex implements Index {
 	 * @return arraylist of file names
 	 */
     private List<String> readFileNames(String path) {
-		// TODO Auto-generated method stub
+    	//System.out.println(path);
+    	String modPath = path.replace("index/", "");
+		// TODO Auto-generated method stub;
+    	//System.out.println(modPath);
 		List<String> fileNames = new ArrayList<>();
 		try {
-			Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>(){
+			Files.walkFileTree(Paths.get(modPath), new SimpleFileVisitor<Path>(){
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
-
-					if ( path.equals(dir))
-					{
-						return FileVisitResult.CONTINUE;
-					}
-					return FileVisitResult.SKIP_SUBTREE;
+				
+					return FileVisitResult.CONTINUE;
 				}
 				
 				@Override
@@ -241,10 +242,8 @@ public class DiskPositionalIndex implements Index {
 		return fileNames;
 	}
 	
-	public List<String> getFileNames(int docID){
-    	List<String> list = new ArrayList<>();
-    	list.add(mFileNames.get(docID));
-		return list;
+	public List<String> getFileNames(){
+    	return mFileNames;
 	}
 	
 	public String[] getVocab() {
@@ -285,8 +284,7 @@ public class DiskPositionalIndex implements Index {
 		return mFileNames.size();
 	}
 
-	private double findDocWeight(int documentID,
-								 RandomAccessFile docWeightsFile, int offset) {
+	private double findDocWeight(int documentID, RandomAccessFile docWeightsFile, int offset) {
 		try {
 			docWeightsFile.seek(documentID*32+offset);
 			byte[] buffer = new byte[8];
