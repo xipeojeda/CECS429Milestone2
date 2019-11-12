@@ -24,7 +24,7 @@ public class AndQuery implements QueryComponent {
 		List<Posting> result = new ArrayList<>();
 		List<Posting> temp;
 
-		// TODO: program the merge for an AndQuery, by gathering the postings of the composed QueryComponents and
+		// The merge for an AndQuery, by gathering the postings of the composed QueryComponents and
 		// intersecting the resulting postings.
 		if (mComponents.size() == 0)  //check if mComponents list is empty
 			return result;
@@ -82,7 +82,7 @@ public class AndQuery implements QueryComponent {
 		List<Posting> result = new ArrayList<>();
 		List<Posting> temp;
 
-		// TODO: program the merge for an AndQuery, by gathering the postings of the composed QueryComponents and
+		// The merge for an AndQuery, by gathering the postings of the composed QueryComponents and
 		// intersecting the resulting postings.
 		if (mComponents.size() == 0)  //check if mComponents list is empty
 			return result;

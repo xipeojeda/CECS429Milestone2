@@ -39,7 +39,6 @@ public class TermDocumentIndex implements Index {
 	public List<Posting> getPostings(String term) {
 		List<Posting> results = new ArrayList<>();
 		
-		// TODO: implement this method.
 		// Binary search the mVocabulary array for the given term.
 		// Walk down the mMatrix row for the term and collect the document IDs (column indices)
 		// of the "true" entries.

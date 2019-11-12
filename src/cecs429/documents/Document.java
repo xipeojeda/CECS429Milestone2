@@ -21,5 +21,8 @@ public interface Document {
 	 */
 	String getTitle();
 	
+	/**
+	 * The file name of the document, for displaying to the user.
+	 */
 	String getFileName();
 }

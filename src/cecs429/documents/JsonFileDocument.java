@@ -54,10 +54,8 @@ public class JsonFileDocument implements FileDocument {
 			setTitle(title);
 			jr.close();
 		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
     	
@@ -74,7 +72,6 @@ public class JsonFileDocument implements FileDocument {
 
 	@Override
 	public String getFileName() {
-		// TODO Auto-generated method stub
 		return documentPath.getFileName().toString();
 	}
 }

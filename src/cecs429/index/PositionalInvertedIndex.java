@@ -7,10 +7,12 @@ import java.util.List;
 
 public class PositionalInvertedIndex implements Index {
 	private HashMap<String,List<Posting>> map;
+
 	public PositionalInvertedIndex()
 	{
 		this.map =  new HashMap<String,List<Posting>>();
 	}
+	
 	@Override
 	public List<Posting> getPostings(String term) {
 		if(map.containsKey(term))
@@ -25,6 +27,7 @@ public class PositionalInvertedIndex implements Index {
 		Collections.sort(sortedKeysList);
 		return sortedKeysList;
 	}
+
 	/*
 	 * add term to hashmap must run at O(1)
 	 */

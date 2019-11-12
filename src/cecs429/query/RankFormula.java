@@ -6,5 +6,4 @@ public interface RankFormula {
     double getWqt(Index i, String term);
     double getWdt(Index i, String term, int docId);
     double getLd(int docId);
-
 }

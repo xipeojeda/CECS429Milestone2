@@ -152,7 +152,8 @@ public class DirectoryCorpus implements DocumentCorpus {
 		corpus.registerFileDocumentFactory(fileExtension, TextFileDocument::loadTextFileDocument);
 		return corpus;
 	}
-	  /**
+
+	/**
      * Constructs a corpus over a directory of simple JSON documents.
      * @param fileExtension The extension of the text documents to load, e.g., ".json".
      */

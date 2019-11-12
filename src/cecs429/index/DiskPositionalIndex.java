@@ -41,7 +41,6 @@ public class DiskPositionalIndex implements Index {
 	private int mCorpusSize;
 	public DiskPositionalIndex(String path) {
 		try {
-			
 			mPath = path + "index/";
 			String mapDbPath = mPath.replace("\\", "\\\\");
 			String temp = mapDbPath + "\\";
@@ -53,7 +52,8 @@ public class DiskPositionalIndex implements Index {
 			mVocabTable = readVocabTable(mPath);
 			mFileNames = readFileNames(mPath);
 			docWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
-		}catch(FileNotFoundException e) {
+		}
+		catch(FileNotFoundException e) {
 			System.out.println(e.toString());
 		}
 	}
@@ -70,9 +70,11 @@ public class DiskPositionalIndex implements Index {
            
             corpusFile.close();
            
-        } catch (FileNotFoundException ex) {
+		} 
+		catch (FileNotFoundException ex) {
             ex.printStackTrace();
-        } catch (IOException ex) {
+		} 
+		catch (IOException ex) {
         	 ex.printStackTrace();
         } 
         return corpusSize; 
@@ -87,11 +89,11 @@ public class DiskPositionalIndex implements Index {
     				return readPostingsBin(mPostings, position);
     		}
         	return null;
-    }
+	}
+	
 	/*
 	 * 
 	 */
-
     public List<Posting> readPostingsBin(RandomAccessFile postings, long pos){
     	try {
     		//seek to the position where postings start
@@ -123,13 +125,11 @@ public class DiskPositionalIndex implements Index {
 				Posting post = new Posting(docID, termFreq);
 				posList.add(post);
 			}
-			
 			return posList;
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
-    	
 		return null;
     }
 
@@ -165,11 +165,9 @@ public class DiskPositionalIndex implements Index {
 					lastPosID = pos;
 					positions.add(pos);
 				}
-
 				Posting post = new Posting(docID, termFreq, positions);
 				posList.add(post);
 			}
-
 			return  posList;
 		}catch(IOException e){
 			e.printStackTrace();
@@ -177,6 +175,9 @@ public class DiskPositionalIndex implements Index {
 		return null;
 	}
 
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
     @Override
     public List<String> getVocabulary() {
         return null;
@@ -206,7 +207,8 @@ public class DiskPositionalIndex implements Index {
 			
 			tableFile.close();
 			return vocabTable;
-		}catch(FileNotFoundException ex) {
+		}
+		catch(FileNotFoundException ex) {
 			ex.printStackTrace();
 		}
 		catch(IOException ex){
@@ -215,16 +217,19 @@ public class DiskPositionalIndex implements Index {
 		return null;
 	}
 	
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public int getTermCount() {
 		return mVocabTable.length / 2;
 	}
+
 	/*
 	 * Walk file tree to get file names
 	 * @param path Directory path
 	 * @return arraylist of file names
 	 */
     private List<String> readFileNames(String path) {
-		// TODO Auto-generated method stub
 		List<String> fileNames = new ArrayList<>();
 		String modPath = path.replace("index/","");
 		try {
@@ -250,37 +255,41 @@ public class DiskPositionalIndex implements Index {
 					return FileVisitResult.CONTINUE;
 				}
 			});
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		return fileNames;
 	}
 	
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public List<String> getFileNames(){
 		return mFileNames;
 	}
 	
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public String[] getVocab() {
 		List<String> vocabList = new ArrayList<>();
 		int i = 0;
 		int j = mVocabTable.length /2 - 1;
 		while(i <= j) {
 			try {
+				int termLength;
+				if(i == j) {
+					termLength = (int) (mVocabList.length() - mVocabTable[i * 2]);
+				}
+				else {
+					termLength = (int) (mVocabList.length() - mVocabTable[i * 2]);
+				}
 				
-			
-			int termLength;
-			if(i == j) {
-				termLength = (int) (mVocabList.length() - mVocabTable[i * 2]);
-			}
-			else {
-				termLength = (int) (mVocabList.length() - mVocabTable[i * 2]);
-			}
-			
-			byte[] buffer = new byte[termLength];
-			mVocabList.read(buffer, 0, termLength);
-			String term = new String(buffer, "ASCII");
-			vocabList.add(term);
+				byte[] buffer = new byte[termLength];
+				mVocabList.read(buffer, 0, termLength);
+				String term = new String(buffer, "ASCII");
+				vocabList.add(term);
 			}catch(IOException e) {
 				e.printStackTrace();
 			i++;
@@ -289,51 +298,66 @@ public class DiskPositionalIndex implements Index {
 		return vocabList.toArray(new String[0]);
 	}
 
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	@Override
 	public List<Posting> getPostings(String term) {
 		// TODO Auto-generated method stub
 		return null;
 	}
 
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public int getDocumentCount(){
 		return mFileNames.size();
 	}
 
-
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public Double getDocWeight(int docID) {
     	try {
 			docWeights.seek(docID * 32);
 			byte[] buffer = new byte[8];
 			docWeights.read(buffer, 0, buffer.length);
 			return ByteBuffer.wrap(buffer).getDouble();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
     	
     	return null;
 	}
 
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public Double getDocLength(int docID) {
 		try {
 			docWeights.seek((docID * 32) + 8);
 			byte[] buffer = new byte[8];
 			docWeights.read(buffer, 0, buffer.length);
 			return ByteBuffer.wrap(buffer).getDouble();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 		return null;
 	}
 
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public Double getDocByteSize(int docID) {
         try {
         	docWeights.seek((docID * 32) + 16);
             byte[] buffer = new byte[8];
             docWeights.read(buffer, 0, buffer.length);
             return ByteBuffer.wrap(buffer).getDouble();
-        } catch (IOException ex) {
+		} 
+		catch (IOException ex) {
             System.out.println(ex.toString());
         }
         return null;
@@ -345,24 +369,32 @@ public class DiskPositionalIndex implements Index {
             byte[] buffer = new byte[8];
             docWeights.read(buffer, 0, buffer.length);
             return ByteBuffer.wrap(buffer).getDouble();
-        } catch (IOException ex) {
+		} 
+		catch (IOException ex) {
             System.out.println(ex.toString());
         }
         return null;
 	}
 
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public Double getAverageDocLength() {
         try {
         	docWeights.seek( mCorpusSize * 32);
             byte[] buffer = new byte[8];
             docWeights.read(buffer, 0, buffer.length);
             return ByteBuffer.wrap(buffer).getDouble();
-        } catch (IOException ex) {
+		} 
+		catch (IOException ex) {
             System.out.println(ex.toString());
         }
         return null;
 	}
 	
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
     public int getCorpusSize() {
         return mCorpusSize;
     }

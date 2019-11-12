@@ -30,11 +30,12 @@ import cecs429.text.Normalize;
 public class  DiskIndexWriter {
 	private String folderPath;
 	private Index index;
-	private List<Map<String, Integer>> docTermFrequency; // term frequencies for a document
+	private List<Map<String, Integer>> docTermFrequency; //term frequencies for a document
 	private ArrayList<Integer> docLength;
-	private List<Double> docByteSize; // byte size of each document
+	private List<Double> docByteSize; //byte size of each document
 	private int corpusSize; 
 	private String lang;
+
 	/*
 	 * Construct an DiskIndexWriter object
 	 * also creates folder with path of corpus
@@ -50,7 +51,8 @@ public class  DiskIndexWriter {
 		if(!directory.exists()) {
 			try {
 				directory.mkdir();
-			}catch(SecurityException e) {
+			}
+			catch(SecurityException e) {
 				e.printStackTrace();
 			}
 		}
@@ -59,6 +61,7 @@ public class  DiskIndexWriter {
         docByteSize = new ArrayList<Double>();
 		
 	}
+
 	/*
 	 * 
 	 */
@@ -69,6 +72,7 @@ public class  DiskIndexWriter {
 		buildCorpusSizeFile(getFolderPath());
 		buildWeight(getFolderPath());
 	}
+
 	/*
 	 * 
 	 */
@@ -110,26 +114,30 @@ public class  DiskIndexWriter {
 				for(int dLength: docLength) {
 					avgDocLength += dLength;
 				}
+
 				avgDocLength /= corpusSize;
 				byte[] avgDocLengthByte = ByteBuffer.allocate(8).putDouble(avgDocLength).array();
 				weightFile.write(avgDocLengthByte, 0, avgDocLengthByte.length);
 				
 			weightFile.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
-		}finally {
+		}
+		finally {
 			try {
 				weightFile.close();
-			}catch(IOException e) {
+			}
+			catch(IOException e) {
 				e.printStackTrace();
 			}
 		}
 		
 	}
+
 	/*
 	 * 
 	 */
@@ -141,14 +149,15 @@ public class  DiskIndexWriter {
 			byte[] cSize = ByteBuffer.allocate(4).putInt(corpusSize).array();
 			corpusFile.write(cSize);
 			corpusFile.close();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (IOException e) {
 			e.printStackTrace();
 		}
 	}
+
 	/*
 	 * 
 	 */
@@ -157,6 +166,7 @@ public class  DiskIndexWriter {
 		buildVocabFile(folderPath, index.getVocabulary(), vPos, "vocab.bin");
 		buildPostingFile(folderPath, index, index.getVocabulary(), vPos);
 	}
+
 	/*
 	 * 
 	 */
@@ -216,18 +226,23 @@ public class  DiskIndexWriter {
 			vocabTable.close();
 			postingsFile.close();
 			postingsTree.close();
-		}catch(FileNotFoundException e) {
+		}
+		catch(FileNotFoundException e) {
 			e.printStackTrace();
-		}catch(IOException e) {
+		}
+		catch(IOException e) {
 			e.printStackTrace();
-		}finally {
+		}
+		finally {
 			try {
 				postingsFile.close();
-			}catch(IOException e) {
+			}
+			catch(IOException e) {
 				e.printStackTrace();
 			}
 		}
 	}
+
 	/*
 	 * 
 	 */
@@ -243,29 +258,31 @@ public class  DiskIndexWriter {
 				vPos[vocabIndex] = vocabPos;
 				try {
 					vocabList.write(term);
-				} catch (IOException e) {
-					// TODO Auto-generated catch block
+				} 
+				catch (IOException e) {
 					e.printStackTrace();
 				}
 				vocabIndex++;
 				vocabPos += term.length();
 			}
-		} catch (UnsupportedEncodingException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
-		} catch (FileNotFoundException e) {
-			// TODO Auto-generated catch block
+		} 
+		catch (FileNotFoundException e) {
 			e.printStackTrace();
-		}finally {
+		}
+		finally {
 			try {
 				vocabList.close();
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
+			} 
+			catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
 		
 	}
+
 	/*
 	 * 
 	 */
@@ -317,10 +334,12 @@ public class  DiskIndexWriter {
                     return FileVisitResult.CONTINUE;
                 }
             });
-        } catch (IOException ex) {
+		} 
+		catch (IOException ex) {
             System.out.println(ex.toString());
         }
 	}
+
 	/*
 	 * 
 	 */
@@ -340,9 +359,11 @@ public class  DiskIndexWriter {
 					StringReader stringReader = new StringReader(jsonObject.get("body").toString());
 					EnglishTokenStream ets = new EnglishTokenStream(stringReader);
 					Normalize normal = new Normalize(lang); /////////////////////////////////////////////LANG
+
 					int position = 0;
 					for(String str : ets.getTokens()) {
 						terms = normal.processToken(str);
+
 						for(String term: terms) {
 							vocab.add(term);
 							pii.addTerm(term, docID, position);
@@ -379,30 +400,40 @@ public class  DiskIndexWriter {
 					docLength.add(positionTxt);
 					break;
 			}
-		}catch(FileNotFoundException e) {
+		}
+		catch(FileNotFoundException e) {
 			e.printStackTrace();
 		}
-		
 		return corpusSize;
-		 
 	 }
-	 
-	 
 
-	//setters and getters for instance variables
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public Index getIndex() {
 		return index;
 	}
+
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public void setIndex(Index index) {
 		this.index = index;
 	}
+
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public String getFolderPath() {
 		return folderPath;
 	}
+
+	/*
+	 * reads the file vocabTable.bin into memory
+	 */
 	public void setFolderPath(String folderPath) {
 		this.folderPath = folderPath;
 	}
-
 }
 
 

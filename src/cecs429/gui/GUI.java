@@ -34,10 +34,9 @@ import cecs429.text.EnglishTokenStream;
 import cecs429.text.Normalize;
 
 public class GUI  extends JPanel{
-	
 	private URI uri;
 	//index default corpus
-    private DocumentCorpus corpus;
+	private DocumentCorpus corpus;
     // DocumentCorpus corpus = DirectoryCorpus.loadTextDirectory(Paths.get(selectDirectory()).toAbsolutePath(), ".txt"); THIS IS FOR .txt FILES
     private Index index;
     private DiskPositionalIndex dpi;
@@ -68,7 +67,6 @@ public class GUI  extends JPanel{
 	 *  GUI for special queries and general search
 	 */
 	public void query() throws Exception{
-
 		SwingUtilities.invokeLater(new Runnable() {
 		public void run(){
 			// Creating GUI Elements
@@ -108,14 +106,12 @@ public class GUI  extends JPanel{
 						counter++;
 					}
 					results.append("Number of Documents Returned With Boolean Query: " +counter);
-
 				}
 			});
 
 			search.addActionListener(new ActionListener() {
 				@Override
 				public void actionPerformed(ActionEvent arg0) {
-					// TODO Auto-generated method stub
 					String query = textField.getText().toLowerCase();
 					// If '-' is at the beginning of the first word switch the second word with first
 					if(query.charAt(0)=='-')
@@ -150,7 +146,6 @@ public class GUI  extends JPanel{
 						}
 						// Printing ending statement
 						results.append("End of Vocabulary - Counter: " + counter + "\n ");
-						
 					}
 					// If first word in string array is ':stem'
 					// Demos the stemming of 1 word
@@ -219,11 +214,11 @@ public class GUI  extends JPanel{
 			}
 		});
 	}
+
 	/*
 	 *  Allows user to select from a directory on disk
 	 */
 	public String selectDirectory() {
-		
 		JFileChooser chooser = new JFileChooser();
 		String temp = null;
 		chooser.setCurrentDirectory(new File("."));
@@ -247,7 +242,6 @@ public class GUI  extends JPanel{
 		else {
 			System.out.println("No Selection ");
 		}
-		
 		return temp;
 	}
 
@@ -283,7 +277,6 @@ public class GUI  extends JPanel{
             EnglishTokenStream ets = new EnglishTokenStream(doc.getContent());
 
             int count = 0; //Keep track of position
-            
             for (String str : ets.getTokens()) {
             	// Process strings
                 List<String> terms = normalize.processToken(str);
@@ -294,7 +287,6 @@ public class GUI  extends JPanel{
                     count++;
                     
                 }
-                
             }
             try {
                 ets.close();
@@ -304,7 +296,8 @@ public class GUI  extends JPanel{
             }
         }
         return pInvIdx;
-    }
+	}
+	
     /*
      * returns an array list of files in directory
      * @param directory of where files are located
@@ -323,7 +316,6 @@ public class GUI  extends JPanel{
     	    	textFiles.add(file.getName());
     	    	break;
     	    }
-    	   
     	  }
     	  i++;
     	}
