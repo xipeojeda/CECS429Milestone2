@@ -8,74 +8,75 @@ import cecs429.text.Normalize;
 
 import java.util.*;
 
-public class RankedRetrieval implements Ranking {
+public class RankedRetrieval implements Ranking, RankFormula {
     @Override
     public ArrayList<Accumalator> rankAlgorithm(String query, DiskPositionalIndex index) {
         HashMap<Integer, Double> accMap = new HashMap<>();
         ArrayList<Accumalator> results = new ArrayList<>();
         String[] tokens = query.split(" ");
         double N = index.getDocumentCount();
-        Normalize processor = new Normalize("en"); //Normalizes in English, fix for language
+        Normalize processor = new Normalize("en");
         List<Posting> postList = new ArrayList<>();
-        double tftd = 0;
-        double wdt = 0;
-        double sumWdt = 0;
-       
         for(int i = 0; i < tokens.length; i++)
         {
-            List<String> myList = new ArrayList<>(processor.processToken(tokens[i])); //Normalized tokens from query
+            List<String> myList = new ArrayList<>(processor.processToken(tokens[i]));
+
 
             //Go back to give option for user to choose
-            for (String token: myList)
+            for (String token: myList) {
                 postList = index.getPostings(token, true);
-
+            }
             if(postList == null)
+            {
                 return null;
+            }
 
-            double dft = postList.size(); //Doc frequency given term
-            double div = N/dft; //Used to calculate Wq,t
-            double wqt = Math.log(1 + div); //Weigh of query given term
-            double accumulator = 0; //Keep track of score for each document
+            double dft = postList.size();
+            double div = N/dft;
+            double wqt = Math.log(1 + div);
+            double accumulator = 0;
+
 
             //loop through postings
-            for (Posting p : postList) {
+            for(int j = 0; j < postList.size(); j++){
+                Posting p = postList.get(j);
 
                 //check for existing accumulator in hashmap
-                if(accMap.containsKey(p.getDocumentId())) //1) Acquire an accumulator val Ad
+                if(accMap.containsKey(p.getDocumentId())){
                     accumulator = accMap.get(p.getDocumentId());
+                }
                 else
                     accumulator = 0;
 
                 //get tftd = size of positions array list
-                tftd = p.getPositions().size() + 1;
+                double tftd = p.getPositions().size();
                 //get wdt
-                wdt = 1 + Math.log(tftd); //2) Calculate Wd,t
+                double wdt = 1 + Math.log(tftd);
                 //increment accumulator --> wdt * wqt
-                accumulator += (wdt * wqt); //3) Increase Ad by Wd,t x Wq,t
+                accumulator += wdt * wqt;
                 //add to map
-                sumWdt += Math.pow(wdt, 2);
                 accMap.put(p.getDocumentId(), accumulator);
             }
+
         }
         //create a pq with the size of the accumulator map
         //use comparator in AccumulatorSort
         PriorityQueue<Accumalator> pq = new PriorityQueue<>(accMap.size(), new AccumulatorSort());
-        
+
         //loop through accMap
         for(Map.Entry<Integer, Double> entry : accMap.entrySet()){
             if(entry.getValue() > 0){
                 //need to add method in diskpositionalindex
-            	
-                double ld = Math.sqrt(sumWdt); //BIG PROBLEMO
+                double ld = index.getDocWeight(entry.getKey());
                 //create new accumulator posting object
-                //For each non-zero Ad, divide Ad by Ld where Ld is read from the docWeights.bin file
-                Accumalator acc = new Accumalator(entry.getKey(), (double)entry.getValue()/ld);
+                Accumalator acc = new Accumalator(entry.getKey(), entry.getValue()/ld);
+
                 //add posting to pq
                 pq.add(acc);
             }
         }
 
-        //loop through first 10 entries in pq and break if there's less than 10
+        //loop through first 10 entrues in pq and break if theres is less than 10
         int i = 0;
         while(i < 10){
             if(pq.peek() != null){
@@ -87,4 +88,20 @@ public class RankedRetrieval implements Ranking {
         }
         return results;
     }
+
+    @Override
+    public double getWqt(Index i, String term) {
+        return 0;
+    }
+
+    @Override
+    public double getWdt(Index i, String term, int docId) {
+        return 0;
+    }
+
+    @Override
+    public double getLd(int docId) {
+        return 0;
+    }
+
 }

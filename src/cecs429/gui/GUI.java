@@ -26,9 +26,7 @@ import cecs429.index.DiskPositionalIndex;
 import cecs429.index.Index;
 import cecs429.index.PositionalInvertedIndex;
 import cecs429.index.Posting;
-import cecs429.query.Accumalator;
 import cecs429.query.BooleanQueryParser;
-import cecs429.query.RankedRetrieval;
 import cecs429.text.EnglishTokenStream;
 import cecs429.text.Normalize;
 
@@ -146,20 +144,14 @@ public class GUI  extends JPanel{
 						int count = 0;
 						BooleanQueryParser booleanQueryParser = new BooleanQueryParser();
 						Normalize normalize = new Normalize("EN");
-						RankedRetrieval rankedRetrieval = new RankedRetrieval();
-				        //for (Posting p : booleanQueryParser.parseQuery(query).getPostings(dpi, normalize)) { ////////MAGIC
-						for (Accumalator a : rankedRetrieval.rankAlgorithm(query, dpi)) {
-							/*
+				        for (Posting p : booleanQueryParser.parseQuery(query).getPostings(dpi, normalize)) { ////////MAGIC
 				        	results.append("Document ID: " + p.getDocumentId() + "\n");
 				            //results.append("File Name: " + corpus.getDocument(p.getDocumentId()).getFileName() + "\n");
 				            //results.append("Title: " + corpus.getDocument(p.getDocumentId()).getTitle() + "\n");
 				            results.append("Positions: " + p.getPositions() + "\n");
 				            results.append("\n");
-				            */
-				            
-							
-							results.append("Doc ID: " + a.getDocID()+ " -- " + a.getAccumulator() + "\n");
-						}
+				            count++;
+				        }
 				        // Prints the amount of results returned
 						results.append("Returned: " + count + "\n");
 						
