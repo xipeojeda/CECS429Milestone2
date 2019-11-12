@@ -3,6 +3,7 @@ package cecs429.gui;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.FileFilter;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.file.Paths;
@@ -46,7 +47,11 @@ public class GUI  extends JPanel{
 	// Default constructor
 	public GUI(){
 		this.directory = selectDirectory();
-		this.corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(this.directory).toAbsolutePath(), ".json"); // THIS IS FOR .json FILES
+		
+		if(jsonFiles(this.directory).get(1).endsWith(".json"))
+			this.corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(this.directory).toAbsolutePath(), ".json");// THIS IS FOR .json FILES
+		else if(!jsonFiles(this.directory).get(1).endsWith(".json"))
+			this.corpus = DirectoryCorpus.loadTextDirectory(Paths.get(this.directory).toAbsolutePath(), ".txt"); // THIS IS FOR .txt FILES
 		this.index = indexCorpus(corpus);
 		this.diw = new DiskIndexWriter(this.directory, this.index);
 		this.diw.buildIndex();
@@ -221,7 +226,10 @@ public class GUI  extends JPanel{
 	 *  Changes directory to new user selected directory by updating corpus and index
 	 */
 	public void changeDirectory(String directory) {
-		this.corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(directory).toAbsolutePath(), ".json");
+		if(jsonFiles(this.directory).get(1).endsWith(".json"))
+			this.corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(this.directory).toAbsolutePath(), ".json");// THIS IS FOR .json FILES
+		else if(!jsonFiles(this.directory).get(1).endsWith(".json"))
+			this.corpus = DirectoryCorpus.loadTextDirectory(Paths.get(this.directory).toAbsolutePath(), ".txt"); // THIS IS FOR .txt FILES
 	    this.index = indexCorpus(corpus);
 	}
 	
@@ -262,6 +270,22 @@ public class GUI  extends JPanel{
         }
         return pInvIdx;
     }
+    /*
+     * returns an array list of files in directory
+     * @param directory of where files are located
+     */
+    private static List<String> jsonFiles(String directory) {
+    	  List<String> textFiles = new ArrayList<String>();
+    	  File dir = new File(directory);
+    	  for (File file : dir.listFiles()) {
+    	    if (file.getName().endsWith((".json"))) {
+    	      textFiles.add(file.getName());
+    	    }
+    	    else
+    	    	textFiles.add(file.getName());
+    	  }
+    	  return textFiles;
+    	}
 
 
 }
