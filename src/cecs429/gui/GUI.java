@@ -72,6 +72,7 @@ public class GUI  extends JPanel{
 			JTextField textField = new JTextField(35);
 			JButton search = new JButton("Search");
 			JButton browse = new JButton("Change Directory");
+			JButton options = new JButton("Boolean Query");
 			JTextArea results = new JTextArea(19,55);
 			JScrollPane scrollPane = new JScrollPane(results);
 			
@@ -80,6 +81,29 @@ public class GUI  extends JPanel{
 				public void actionPerformed(ActionEvent e) {
 					String selectNewIndex = selectDirectory();
 					changeDirectory(selectNewIndex);
+				}
+			});
+
+			options.addActionListener(new ActionListener() {
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					System.out.println("its here");
+					String query = textField.getText().toLowerCase();
+					BooleanQueryParser test = new BooleanQueryParser();
+					Normalize normalize = new Normalize("EN");
+					test.parseQuery(query);
+					int counter = 0;
+					for(Posting p: test.parseQuery(query).getPostings(dpi, normalize))
+					{
+						results.append("Document ID: " + p.getDocumentId() + "\n");
+						//results.append("File Name: " + corpus.getDocument(p.getDocumentId()).getFileName() + "\n");
+						//results.append("Title: " + corpus.getDocument(p.getDocumentId()).getTitle() + "\n");
+						//results.append("Positions: " + p.getPositions() + "\n");
+						//results.append("\n");
+						counter++;
+					}
+					results.append("Number of Documents Returned With Boolean Query: " +counter);
+
 				}
 			});
 
@@ -178,6 +202,7 @@ public class GUI  extends JPanel{
 			panel.add(textField);
 			panel.add(search);
 			panel.add(browse);
+			panel.add(options);
 			panel.add(scrollPane);
 			frame.add(panel);
 			frame.setSize(800, 400);
