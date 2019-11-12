@@ -36,13 +36,14 @@ public class  DiskIndexWriter {
 	private int corpusSize; 
 	private String lang;
 
-	/*
+	/**
 	 * Construct an DiskIndexWriter object
 	 * also creates folder with path of corpus
 	 * @param folderPath Folder where to write Index
-	 * @param index 
+	 * @param index The given index
+	 * @param lang The language choice
 	 */
-	public DiskIndexWriter(String folderPath, Index index,String lang) {
+	public DiskIndexWriter(String folderPath, Index index, String lang) {
 		this.lang=lang;
 		this.setIndex(index);
 		this.setFolderPath(folderPath + "index");
@@ -62,8 +63,8 @@ public class  DiskIndexWriter {
 		
 	}
 
-	/*
-	 * 
+	/** 
+	 * Builds the index
 	 */
 	public void buildIndex() {
 		SortedSet<String> vocabulary = new TreeSet<>();
@@ -73,11 +74,11 @@ public class  DiskIndexWriter {
 		buildWeight(getFolderPath());
 	}
 
-	/*
-	 * 
+	/** 
+	 * Builds the weight given a folder path
+	 * @param folderPath the location of the folder
 	 */
 	private void buildWeight(String folderPath) {
-		// TODO Auto-generated method stub
 		FileOutputStream weightFile = null;
 		try {
 			weightFile = new FileOutputStream(new File(folderPath, "docWeights.bin"));
@@ -138,8 +139,9 @@ public class  DiskIndexWriter {
 		
 	}
 
-	/*
-	 * 
+	/** 
+	 * Builds the file for corpus size given a folder path
+	 * @param folderPath the location of the folder
 	 */
 	private void buildCorpusSizeFile(String folderPath) {
 		FileOutputStream corpusFile = null;
@@ -158,8 +160,10 @@ public class  DiskIndexWriter {
 		}
 	}
 
-	/*
-	 * 
+	/** 
+	 * Build index for the given directory
+	 * @param index the given index
+	 * @param folderPath the folder path
 	 */
 	private void buildIndexForDirectory(Index index, String folderPath) {
 		long[] vPos = new long[index.getVocabulary().size()];
@@ -167,8 +171,12 @@ public class  DiskIndexWriter {
 		buildPostingFile(folderPath, index, index.getVocabulary(), vPos);
 	}
 
-	/*
-	 * 
+	/**
+	 * Builds the posting file
+	 * @param folderPath the folder path
+	 * @param index the given index
+	 * @param vocab list of vocabulary terms
+	 * @param vPos the positions of vocab
 	 */
 	private static void buildPostingFile(String folderPath, Index index, List<String> vocab, long[] vPos) {
 		FileOutputStream postingsFile = null;
@@ -243,8 +251,13 @@ public class  DiskIndexWriter {
 		}
 	}
 
-	/*
-	 * 
+	/** 
+	 * Builds the vocab file
+	 * @param folderPath the folder path
+	 * @param index the given index
+	 * @param vocab list of vocabulary terms
+	 * @param vPos the positions of vocab
+	 * @param file the file
 	 */
 	private static void buildVocabFile(String folderPath, List<String> vocab, long[] vPos, String file) {
 		OutputStreamWriter vocabList = null;
@@ -283,11 +296,13 @@ public class  DiskIndexWriter {
 		
 	}
 
-	/*
-	 * 
+	/** 
+	 * Create index file
+	 * @param path the path
+	 * @param vocab list of vocabulary terms
+	 * @param index the given index
 	 */
 	private void indexFile(Path path, SortedSet<String> vocab, Index index) {
-		// TODO Auto-generated method stub
 		String fullPath = path.toString();
 		String modPath = fullPath.replace("index", "");
 		Path newPath = Paths.get(modPath);
@@ -340,8 +355,13 @@ public class  DiskIndexWriter {
         }
 	}
 
-	/*
-	 * 
+	/** 
+	 * Index based on file type
+	 * @param file the file
+	 * @param index the index
+	 * @param vocab the vocabulary
+	 * @param docID the id of the document
+	 * @param fileType the file type
 	 */
 	 private int indexFileTypes(File file, Index index, SortedSet<String> vocab, int docID, String fileType) {
 		 List<String> terms;
@@ -407,29 +427,31 @@ public class  DiskIndexWriter {
 		return corpusSize;
 	 }
 
-	/*
+	/** 
 	 * reads the file vocabTable.bin into memory
+	 * @return the index
 	 */
 	public Index getIndex() {
 		return index;
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Updates index
 	 */
 	public void setIndex(Index index) {
 		this.index = index;
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Returns the folder path
+	 * @return the folder path
 	 */
 	public String getFolderPath() {
 		return folderPath;
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Sets the folder path
 	 */
 	public void setFolderPath(String folderPath) {
 		this.folderPath = folderPath;

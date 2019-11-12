@@ -58,6 +58,11 @@ public class DiskPositionalIndex implements Index {
 		}
 	}
 
+	/**
+	 * Read the corpus size
+	 * @param path the path
+	 * @return the corpus size
+	 */
 	public int readCorpusSize(String path) {
         int corpusSize = 0;
 
@@ -79,7 +84,13 @@ public class DiskPositionalIndex implements Index {
         } 
         return corpusSize; 
 	}
-
+	 
+	/**
+	 * Get the postings given a term and positions
+	 * @param term the term
+	 * @param positions the positions of the term
+	 * @return the list containing the postings
+	 */
 	public List<Posting> getPostings(String term, boolean positions) {
     		long position = postingsDB.get(term);
     		if(position >= 0) {
@@ -91,8 +102,11 @@ public class DiskPositionalIndex implements Index {
         	return null;
 	}
 	
-	/*
-	 * 
+	/**
+	 * Read the postings bin file
+	 * @param postings the postings
+	 * @param pos the position
+	 * @return a list of postings
 	 */
     public List<Posting> readPostingsBin(RandomAccessFile postings, long pos){
     	try {
@@ -133,6 +147,12 @@ public class DiskPositionalIndex implements Index {
 		return null;
     }
 
+	/**
+	 * Read the positional postings
+	 * @param postings the postings
+	 * @param position the position
+	 * @return the list of postings
+	 */
     public List<Posting> readPositionalPosting(RandomAccessFile postings, long position){
 		try{
 			postings.seek(position);
@@ -175,19 +195,21 @@ public class DiskPositionalIndex implements Index {
 		return null;
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Get vocabulary
+	 * @return null
 	 */
     @Override
     public List<String> getVocabulary() {
         return null;
     }
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Read the vocab table
+	 * @param indexName the name of the index
+	 * @return the long array of the vocab
 	 */
 	private static long[] readVocabTable(String indexName) {
-
 		try {
 			long[] vocabTable;
 
@@ -217,14 +239,15 @@ public class DiskPositionalIndex implements Index {
 		return null;
 	}
 	
-	/*
-	 * reads the file vocabTable.bin into memory
+	/** 
+	 * Get the term count
+	 * @return the term count calculation
 	 */
 	public int getTermCount() {
 		return mVocabTable.length / 2;
 	}
 
-	/*
+	/**
 	 * Walk file tree to get file names
 	 * @param path Directory path
 	 * @return arraylist of file names
@@ -262,15 +285,17 @@ public class DiskPositionalIndex implements Index {
 		return fileNames;
 	}
 	
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Returns the file name
+	 * @return the list of file names
 	 */
 	public List<String> getFileNames(){
 		return mFileNames;
 	}
 	
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Get the vocabulary
+	 * @return the array of vocabulary
 	 */
 	public String[] getVocab() {
 		List<String> vocabList = new ArrayList<>();
@@ -298,24 +323,28 @@ public class DiskPositionalIndex implements Index {
 		return vocabList.toArray(new String[0]);
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Get the postings given a term
+	 * @param term the term
+	 * @return null;
 	 */
 	@Override
 	public List<Posting> getPostings(String term) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Return the number of documents
+	 * @return the size of mFileNames
 	 */
 	public int getDocumentCount(){
 		return mFileNames.size();
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Return doc weight based on doc id
+	 * @param docID the document id
+	 * @return the doc weight
 	 */
 	public Double getDocWeight(int docID) {
     	try {
@@ -327,12 +356,13 @@ public class DiskPositionalIndex implements Index {
 		catch (IOException e) {
 			e.printStackTrace();
 		}
-    	
     	return null;
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * The document length
+	 * @param docID the document id
+	 * @return document length
 	 */
 	public Double getDocLength(int docID) {
 		try {
@@ -347,8 +377,10 @@ public class DiskPositionalIndex implements Index {
 		return null;
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * The document byte size
+	 * @param docID the doc id
+	 * @return the size of the doc in bytes, null if nothing
 	 */
 	public Double getDocByteSize(int docID) {
         try {
@@ -363,6 +395,11 @@ public class DiskPositionalIndex implements Index {
         return null;
 	}
 
+	/**
+	 * Given a document id, return the avg term freq related to that doc id
+	 * @param docID the document id
+	 * @return the average term frequency
+	 */
 	public Double getAverageTermFreq(int docID) {
         try {
         	docWeights.seek((docID * 32) + 24);
@@ -376,8 +413,9 @@ public class DiskPositionalIndex implements Index {
         return null;
 	}
 
-	/*
-	 * reads the file vocabTable.bin into memory
+	/** 
+	 * Returns average document length
+	 * @return the document length, null if there is none
 	 */
 	public Double getAverageDocLength() {
         try {
@@ -392,8 +430,9 @@ public class DiskPositionalIndex implements Index {
         return null;
 	}
 	
-	/*
-	 * reads the file vocabTable.bin into memory
+	/**
+	 * Returns corpus size
+	 * @return the corpus size
 	 */
     public int getCorpusSize() {
         return mCorpusSize;

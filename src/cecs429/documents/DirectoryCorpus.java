@@ -106,6 +106,10 @@ public class DirectoryCorpus implements DocumentCorpus {
 		return "." + extension;
 	}
 	
+	/**
+	 * Returns values of mDocuments
+     * @return the values of mDocuments
+     */
 	@Override
 	public Iterable<Document> getDocuments() {
 		if (mDocuments == null) {
@@ -118,6 +122,10 @@ public class DirectoryCorpus implements DocumentCorpus {
 		return mDocuments.values();
 	}
 	
+	/**
+	 * Returns the size of mDocuments
+     * @return the size of mDocuments
+     */
 	@Override
 	public int getCorpusSize() {
 		if (mDocuments == null) {
@@ -130,6 +138,11 @@ public class DirectoryCorpus implements DocumentCorpus {
 		return mDocuments.size();
 	}
 	
+	/**
+	 * Returns documents given an id
+     * @param id the document id
+     * @return the documents related with the id
+     */
 	@Override
 	public Document getDocument(int id) {
 		return mDocuments.get(id);

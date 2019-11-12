@@ -215,8 +215,9 @@ public class GUI  extends JPanel{
 		});
 	}
 
-	/*
-	 *  Allows user to select from a directory on disk
+	/** 
+	 * Allows user to select from a directory on disk
+	 * @return the directory
 	 */
 	public String selectDirectory() {
 		JFileChooser chooser = new JFileChooser();
@@ -246,8 +247,9 @@ public class GUI  extends JPanel{
 	}
 
 	
-	/*
-	 *  Changes directory to new user selected directory by updating corpus and index
+	/** 
+	 * Changes directory to new user selected directory by updating corpus and index
+	 * @param directory the directory
 	 */
 	public void changeDirectory(String directory) {
 		String temp = JOptionPane.showInputDialog("Please input language in use");
@@ -262,8 +264,10 @@ public class GUI  extends JPanel{
 	    this.index = indexCorpus(corpus);
 	}
 	
-	/*
+	/** 
 	 * Creates a PositionalInvertedIndex 
+	 * @param corpus the DocumentCorpus
+	 * @return a PositionalInvertedIndex object
 	 */
     private static PositionalInvertedIndex indexCorpus(DocumentCorpus corpus) {
     	// Display dialog box to user when indexCorpus is ran
@@ -298,9 +302,9 @@ public class GUI  extends JPanel{
         return pInvIdx;
 	}
 	
-    /*
+    /** 
      * returns an array list of files in directory
-     * @param directory of where files are located
+     * @param directory Directory of where files are located
      */
     private static List<String> jsonFiles(String directory) {
     	  List<String> textFiles = new ArrayList<String>();

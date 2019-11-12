@@ -9,7 +9,8 @@ import cecs429.text.Normalize;
 import java.util.*;
 
 public class RankedRetrieval implements Ranking {
-	private String lang;
+    private String lang;
+    
     @Override
     public ArrayList<Accumalator> rankAlgorithm(String query, DiskPositionalIndex index,String lang) {
     	this.lang=lang;
