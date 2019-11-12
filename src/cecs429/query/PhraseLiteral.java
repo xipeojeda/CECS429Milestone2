@@ -145,10 +145,10 @@ public class PhraseLiteral implements QueryComponent {
 		if(mTerms.size() == 0)
 			return result;
 		else
-			result.addAll(dpi.getPostings(processedList.get(0)));
+			result.addAll(dpi.getPostings(processedList.get(0), true));
 
 		for(int i = 1; i < mTerms.size();i++) {
-			temp = dpi.getPostings(processedList.get(i)); //"POSITIONAL MERGE" happens here
+			temp = dpi.getPostings(processedList.get(i), true); //"POSITIONAL MERGE" happens here
 			result = positionalMerge(result,temp, i); //CALL HELPER METHOD
 		}
 

@@ -129,10 +129,10 @@ public class NearLiteral implements QueryComponent {
             return result;
         else
             //add all postings of index 1
-            result.addAll(dpi.getPostings(processedList.get(0)));
+            result.addAll(dpi.getPostings(processedList.get(0), true));
         // traverse through the amount of items in mTerms list
         for(int i = 0; i < mTerms.size();i++) {
-            temp = dpi.getPostings(processedList.get(i)); //adding the postings of the normalized terms
+            temp = dpi.getPostings(processedList.get(i), true); //adding the postings of the normalized terms
             result=positionalMerge(result,temp, x); //do the positional merge
         }
         return result;

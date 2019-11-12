@@ -162,15 +162,15 @@ public class DiskPositionalIndex implements Index {
     public List<String> getVocabulary() {
         return null;
     }
-    
-    
+
 	/*
 	 * reads the file vocabTable.bin into memory
 	 */
 	private static long[] readVocabTable(String indexName) {
+
 		try {
 			long[] vocabTable;
-			
+
 			RandomAccessFile tableFile = new RandomAccessFile(new File(indexName, "vocabTable.bin"), "r");
 			
 			byte[] byteBuffer = new byte[8];
@@ -207,8 +207,9 @@ public class DiskPositionalIndex implements Index {
     private List<String> readFileNames(String path) {
 		// TODO Auto-generated method stub
 		List<String> fileNames = new ArrayList<>();
+		String modPath = path.replace("index/","");
 		try {
-			Files.walkFileTree(Paths.get(path), new SimpleFileVisitor<Path>(){
+			Files.walkFileTree(Paths.get(modPath), new SimpleFileVisitor<Path>(){
 				@Override
 				public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) {
 					return FileVisitResult.CONTINUE;
@@ -217,9 +218,10 @@ public class DiskPositionalIndex implements Index {
 				@Override
 				public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws FileNotFoundException{
 					//only process json files
-					if(file.toString().endsWith(".json")) {
+					if(file.toString().endsWith(".json"))
 						fileNames.add(file.toFile().getName());//add to list
-					}
+					else if (file.toString().endsWith(".txt"))
+						fileNames.add(file.toFile().getName());
 					return FileVisitResult.CONTINUE;
 				}
 				// We dont want to throw exceptions if files are locked
@@ -293,8 +295,6 @@ public class DiskPositionalIndex implements Index {
 		return 0.0;
 	}
 
-
-
 	public double getDocWeight(int docID) {
     	return findDocWeight(docID, docWeights, 0);
 	}
@@ -314,5 +314,4 @@ public class DiskPositionalIndex implements Index {
 	public double getAverageDocLength() {
 		return findDocWeight(mFileNames.size(), docWeights, 0);
 	}
-
 }
