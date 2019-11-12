@@ -50,13 +50,12 @@ public class RankedRetrieval implements Ranking {
                     accumulator = 0;
 
                 //get tftd = size of positions array list
-                tftd = p.getPositions().size() + 1;
+                tftd = p.getPositions().size();
                 //get wdt
                 wdt = 1 + Math.log(tftd); //2) Calculate Wd,t
                 //increment accumulator --> wdt * wqt
                 accumulator += (wdt * wqt); //3) Increase Ad by Wd,t x Wq,t
                 //add to map
-                sumWdt += Math.pow(wdt, 2);
                 accMap.put(p.getDocumentId(), accumulator);
             }
         }
@@ -69,7 +68,7 @@ public class RankedRetrieval implements Ranking {
             if(entry.getValue() > 0){
                 //need to add method in diskpositionalindex
             	
-                double ld = Math.sqrt(sumWdt); //BIG PROBLEMO
+                double ld = index.getDocWeight(entry.getKey()); //BIG PROBLEMO
                 //create new accumulator posting object
                 //For each non-zero Ad, divide Ad by Ld where Ld is read from the docWeights.bin file
                 Accumalator acc = new Accumalator(entry.getKey(), (double)entry.getValue()/ld);

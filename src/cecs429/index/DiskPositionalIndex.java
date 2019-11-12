@@ -114,7 +114,7 @@ public class DiskPositionalIndex implements Index {
 			postings.seek(pos);
 			
 			// read the 8 bytes for doc freq
-			byte[] buffer = new byte[8];
+			byte[] buffer = new byte[4];
 			postings.read(buffer, 0, buffer.length);
 			
 			//use ByteBuffer to convert the 8 bytes to int
@@ -125,12 +125,12 @@ public class DiskPositionalIndex implements Index {
 			ArrayList<Posting> posList = new ArrayList<>();
 			
 			for(int i = 0; i < docFreq; i++) {
-				byte[] docBuffer = new byte[8];
+				byte[] docBuffer = new byte[4];
 				postings.read(docBuffer,0,docBuffer.length);
 				int docID = ByteBuffer.wrap(docBuffer).getInt() + lastDocID;
 				lastDocID = docID;
 
-				byte[] tfBuffer = new byte[8];
+				byte[] tfBuffer = new byte[4];
 				postings.read(tfBuffer, 0, tfBuffer.length);
 
 				int termFreq = ByteBuffer.wrap(tfBuffer).getInt();
@@ -156,7 +156,7 @@ public class DiskPositionalIndex implements Index {
     public List<Posting> readPositionalPosting(RandomAccessFile postings, long position){
 		try{
 			postings.seek(position);
-			byte[] buffer = new byte[8];
+			byte[] buffer = new byte[4];
 			postings.read(buffer,0,buffer.length);
 
 			int documentFreq = ByteBuffer.wrap(buffer).getInt();
@@ -167,19 +167,19 @@ public class DiskPositionalIndex implements Index {
 
 			for(int i = 0; i < documentFreq; i++){
 				ArrayList<Integer> positions = new ArrayList<>();
-				byte[] docBuffer = new byte[8];
+				byte[] docBuffer = new byte[4];
 				postings.read(docBuffer, 0, docBuffer.length);
 
 				int docID = ByteBuffer.wrap(docBuffer).getInt() + lastDocID;
 				lastDocID = docID;
 
-				byte[] tfBuffer = new byte[8];
+				byte[] tfBuffer = new byte[4];
 				postings.read(tfBuffer, 0, tfBuffer.length);
 
 				int termFreq = ByteBuffer.wrap(tfBuffer).getInt();
 
 				for(int j = 0; j < termFreq; j++){
-					byte[] posBuffer = new byte[8];
+					byte[] posBuffer = new byte[4];
 					postings.read(posBuffer, 0, posBuffer.length);
 					int pos = ByteBuffer.wrap(posBuffer).getInt() + lastPosID;
 					lastPosID = pos;
@@ -215,7 +215,7 @@ public class DiskPositionalIndex implements Index {
 
 			RandomAccessFile tableFile = new RandomAccessFile(new File(indexName, "vocabTable.bin"), "r");
 			
-			byte[] byteBuffer = new byte[8];
+			byte[] byteBuffer = new byte[4];
 			tableFile.read(byteBuffer, 0, byteBuffer.length);
 			
 			int tableIndex = 0;
@@ -313,7 +313,7 @@ public class DiskPositionalIndex implements Index {
 				
 				byte[] buffer = new byte[termLength];
 				mVocabList.read(buffer, 0, termLength);
-				String term = new String(buffer, "ASCII");
+				String term = new String(buffer, "UTF-8");
 				vocabList.add(term);
 			}catch(IOException e) {
 				e.printStackTrace();

@@ -264,7 +264,7 @@ public class  DiskIndexWriter {
 		
 		int vocabIndex = 0;
 		try {
-			vocabList = new OutputStreamWriter(new FileOutputStream(new File(folderPath, file)), "ASCII");
+			vocabList = new OutputStreamWriter(new FileOutputStream(new File(folderPath, file)), "UTF-8");
 			
 			int vocabPos = 0;
 			for(String term: vocab) {
