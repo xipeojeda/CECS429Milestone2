@@ -256,6 +256,11 @@ public class GUI  extends JPanel{
 	 *  Changes directory to new user selected directory by updating corpus and index
 	 */
 	public void changeDirectory(String directory) {
+		String temp = JOptionPane.showInputDialog("Please input language in use");
+		if(temp.equals("english")||temp.equals("English"))
+			langOp="en";
+		else if(temp.equals("french")||temp.equals("French"))
+			langOp="fr";
 		if(jsonFiles(this.directory).get(1).endsWith(".json"))
 			this.corpus = DirectoryCorpus.loadJsonDirectory(Paths.get(this.directory).toAbsolutePath(), ".json");// THIS IS FOR .json FILES
 		else if(!jsonFiles(this.directory).get(1).endsWith(".json"))
