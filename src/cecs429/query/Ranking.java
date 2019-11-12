@@ -6,5 +6,5 @@ import cecs429.index.DiskPositionalIndex;
 import java.util.ArrayList;
 
 public interface Ranking {
-    public ArrayList<Accumalator> rankAlgorithm(String query, DiskPositionalIndex index,String lang);
+    public ArrayList<Accumalator> rankAlgorithm(String query, DiskPositionalIndex index);
 }
