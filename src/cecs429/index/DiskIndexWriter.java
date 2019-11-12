@@ -34,6 +34,7 @@ public class  DiskIndexWriter {
 	private ArrayList<Integer> docLength;
 	private List<Double> docByteSize; // byte size of each document
 	private int corpusSize; 
+	private String lang;
 	
 	/*
 	 * Construct an DiskIndexWriter object
@@ -41,7 +42,7 @@ public class  DiskIndexWriter {
 	 * @param folderPath Folder where to write Index
 	 * @param index 
 	 */
-	public DiskIndexWriter(String folderPath, Index index) {
+	public DiskIndexWriter(String folderPath, Index index,String lang) {
 		this.setIndex(index);
 		this.setFolderPath(folderPath + "index");
 		//creating directory
@@ -56,6 +57,7 @@ public class  DiskIndexWriter {
         docTermFrequency = new ArrayList<Map<String, Integer>>();
         docLength = new ArrayList<Integer>();
         docByteSize = new ArrayList<Double>();
+        this.lang=lang;
 		
 	}
 	/*
@@ -338,7 +340,7 @@ public class  DiskIndexWriter {
 					
 					StringReader stringReader = new StringReader(jsonObject.get("body").toString());
 					EnglishTokenStream ets = new EnglishTokenStream(stringReader);
-					Normalize normal = new Normalize("en"); /////////////////////////////////////////////LANG
+					Normalize normal = new Normalize(lang); /////////////////////////////////////////////LANG
 					int position = 0;
 					for(String str : ets.getTokens()) {
 						terms = normal.processToken(str);
@@ -360,7 +362,7 @@ public class  DiskIndexWriter {
 
 					TextFileDocument txtDoc =  new TextFileDocument(docID, Paths.get(file.getAbsolutePath()));
 					EnglishTokenStream etsTxt = new EnglishTokenStream(txtDoc.getContent());
-					Normalize normalTxt = new Normalize("en"); /////////////////////////////////////////////LANG
+					Normalize normalTxt = new Normalize(lang); /////////////////////////////////////////////LANG
 					int positionTxt = 0;
 
 					for(String str :etsTxt.getTokens()) {

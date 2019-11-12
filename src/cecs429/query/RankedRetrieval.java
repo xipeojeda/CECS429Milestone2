@@ -9,13 +9,15 @@ import cecs429.text.Normalize;
 import java.util.*;
 
 public class RankedRetrieval implements Ranking {
+	private String lang;
     @Override
-    public ArrayList<Accumalator> rankAlgorithm(String query, DiskPositionalIndex index) {
+    public ArrayList<Accumalator> rankAlgorithm(String query, DiskPositionalIndex index,String lang) {
+    	this.lang=lang;
         HashMap<Integer, Double> accMap = new HashMap<>();
         ArrayList<Accumalator> results = new ArrayList<>();
         String[] tokens = query.split(" ");
         double N = index.getDocumentCount();
-        Normalize processor = new Normalize("en"); //Normalizes in English, fix for language
+        Normalize processor = new Normalize(lang); //Normalizes in English, or French
         List<Posting> postList = new ArrayList<>();
         double tftd = 0;
         double wdt = 0;

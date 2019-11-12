@@ -43,9 +43,15 @@ public class GUI  extends JPanel{
     private DiskPositionalIndex dpi;
     private String directory = "";
     private DiskIndexWriter diw;
+    private static String langOp;
       
 	// Default constructor
 	public GUI(){
+		String temp = JOptionPane.showInputDialog("Please input language in use");
+		if(temp.equals("english")||temp.equals("English"))
+			langOp="en";
+		else if(temp.equals("french")||temp.equals("French"))
+			langOp="fr";
 		this.directory = selectDirectory();
 		
 		if(jsonFiles(this.directory).get(1).endsWith(".json"))
@@ -53,7 +59,7 @@ public class GUI  extends JPanel{
 		else if(!jsonFiles(this.directory).get(1).endsWith(".json"))
 			this.corpus = DirectoryCorpus.loadTextDirectory(Paths.get(this.directory).toAbsolutePath(), ".txt"); // THIS IS FOR .txt FILES
 		this.index = indexCorpus(corpus);
-		this.diw = new DiskIndexWriter(this.directory, this.index);
+		this.diw = new DiskIndexWriter(this.directory, this.index,langOp);
 		this.diw.buildIndex();
 		this.dpi = new DiskPositionalIndex(this.directory);
 		
@@ -126,7 +132,7 @@ public class GUI  extends JPanel{
 					// If first word in string array is ':stem'
 					// Demos the stemming of 1 word
 					else if(special[0].equals(":stem")) {
-						Normalize normal = new Normalize("EN");
+						Normalize normal = new Normalize(langOp);
 						List<String> normalized = normal.processToken(special[1]);
 						String stemmedWord = "";
 						for (String term: normalized) {
@@ -150,10 +156,10 @@ public class GUI  extends JPanel{
 					else {
 						int count = 0;
 						BooleanQueryParser booleanQueryParser = new BooleanQueryParser();
-						Normalize normalize = new Normalize("EN");
+						Normalize normalize = new Normalize(langOp);
 						RankedRetrieval rankedRetrieval = new RankedRetrieval();
 				        //for (Posting p : booleanQueryParser.parseQuery(query).getPostings(dpi, normalize)) { ////////MAGIC
-						for (Accumalator a : rankedRetrieval.rankAlgorithm(query, dpi)) {
+						for (Accumalator a : rankedRetrieval.rankAlgorithm(query, dpi,langOp)) {
 							/*
 				        	results.append("Document ID: " + p.getDocumentId() + "\n");
 				            //results.append("File Name: " + corpus.getDocument(p.getDocumentId()).getFileName() + "\n");
@@ -241,7 +247,7 @@ public class GUI  extends JPanel{
     	JOptionPane.showMessageDialog(null, "Indexing Please Wait...");
     	PositionalInvertedIndex pInvIdx = new PositionalInvertedIndex(); // Positional Inverted index
         Iterable<Document> documentsIterable = corpus.getDocuments(); //Make documents iterable
-        Normalize normalize = new Normalize("EN"); //WORD STEMMING
+        Normalize normalize = new Normalize(langOp); //WORD STEMMING
         HashSet<String> vocabulary = new HashSet<>();
         // Goes through the documents in the corpus
         for (Document doc : documentsIterable) {
