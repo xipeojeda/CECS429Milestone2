@@ -54,6 +54,6 @@ public class TextFileDocument implements FileDocument {
 	@Override
 	public String getFileName() {
 		// TODO Auto-generated method stub
-		return null;
+		return mFilePath.getFileName().toString();
 	}
 }

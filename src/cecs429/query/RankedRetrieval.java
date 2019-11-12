@@ -17,7 +17,10 @@ public class RankedRetrieval implements Ranking {
         double N = index.getDocumentCount();
         Normalize processor = new Normalize("en"); //Normalizes in English, fix for language
         List<Posting> postList = new ArrayList<>();
-
+        double tftd = 0;
+        double wdt = 0;
+        double sumWdt = 0;
+       
         for(int i = 0; i < tokens.length; i++)
         {
             List<String> myList = new ArrayList<>(processor.processToken(tokens[i])); //Normalized tokens from query
@@ -44,46 +47,29 @@ public class RankedRetrieval implements Ranking {
                     accumulator = 0;
 
                 //get tftd = size of positions array list
-                double tftd = p.getPositions().size() + 1;
+                tftd = p.getPositions().size() + 1;
                 //get wdt
-                double wdt = 1 + Math.log(tftd); //2) Calculate Wd,t
+                wdt = 1 + Math.log(tftd); //2) Calculate Wd,t
                 //increment accumulator --> wdt * wqt
-                accumulator += wdt * wqt; //3) Increase Ad by Wd,t x Wq,t
+                accumulator += (wdt * wqt); //3) Increase Ad by Wd,t x Wq,t
                 //add to map
-                System.out.println("N " + N);
-                System.out.println("dft " + dft);
-                System.out.println("div " + div);
-                System.out.println("wqt " + wqt);
-                System.out.println("wdt " + wdt);
-                System.out.println("tftd " + tftd);
-                System.out.println("AAAAAA: " + accumulator);
-                System.out.println("PP " + p.getPositions());
-
+                sumWdt += Math.pow(wdt, 2);
                 accMap.put(p.getDocumentId(), accumulator);
-                System.out.println("From map " + accMap.get(p.getDocumentId()));
-                System.out.println();
             }
         }
         //create a pq with the size of the accumulator map
         //use comparator in AccumulatorSort
         PriorityQueue<Accumalator> pq = new PriorityQueue<>(accMap.size(), new AccumulatorSort());
-
+        
         //loop through accMap
         for(Map.Entry<Integer, Double> entry : accMap.entrySet()){
             if(entry.getValue() > 0){
-                System.out.println("ENTRY " + entry.getValue());
-
                 //need to add method in diskpositionalindex
-                double ld = index.getDocWeight(entry.getKey()); //BIG PROBLEMO
-
-                System.out.println("Entry key " + entry.getKey());
-                System.out.println("Entry index stuff " + index.getDocWeight(entry.getKey()));
-                System.out.println("ld " + ld);
+            	
+                double ld = Math.sqrt(sumWdt); //BIG PROBLEMO
                 //create new accumulator posting object
                 //For each non-zero Ad, divide Ad by Ld where Ld is read from the docWeights.bin file
                 Accumalator acc = new Accumalator(entry.getKey(), (double)entry.getValue()/ld);
-                System.out.println("STUPID " + (double)entry.getValue()/ld);
-                System.out.println("ACC " + acc.getAccumulator());
                 //add posting to pq
                 pq.add(acc);
             }

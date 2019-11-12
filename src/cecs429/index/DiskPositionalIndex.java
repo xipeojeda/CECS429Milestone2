@@ -38,8 +38,7 @@ public class DiskPositionalIndex implements Index {
 	//private ConcurrentNavigableMap<String, Long> vocabDB;
 	private ConcurrentNavigableMap<String, Long> postingsDB;
 	private DB db;
-	
-	
+	private int mCorpusSize;
 	public DiskPositionalIndex(String path) {
 		try {
 			
@@ -50,13 +49,33 @@ public class DiskPositionalIndex implements Index {
 			mPostings = new RandomAccessFile(new File(mPath, "postings.bin"), "r");
 			db = DBMaker.fileDB(temp + "postingsTree").make();
 			postingsDB = this.db.treeMap("postingsTree", Serializer.STRING, Serializer.LONG).open();
-			
+			mCorpusSize = readCorpusSize(mPath);
 			mVocabTable = readVocabTable(mPath);
 			mFileNames = readFileNames(mPath);
 			docWeights = new RandomAccessFile(new File(mPath, "docWeights.bin"), "r");
 		}catch(FileNotFoundException e) {
 			System.out.println(e.toString());
 		}
+	}
+
+	public int readCorpusSize(String path) {
+        int corpusSize = 0;
+
+        try {
+            RandomAccessFile corpusFile = new RandomAccessFile(new File(path, "corpusSize.bin"), "r");
+            byte[] byteBuffer = new byte[4];
+
+            corpusFile.read(byteBuffer);
+            corpusSize = ByteBuffer.wrap(byteBuffer).getInt();
+           
+            corpusFile.close();
+           
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        } catch (IOException ex) {
+        	 ex.printStackTrace();
+        } 
+        return corpusSize; 
 	}
 
 	public List<Posting> getPostings(String term, boolean positions) {
@@ -280,38 +299,71 @@ public class DiskPositionalIndex implements Index {
 		return mFileNames.size();
 	}
 
-	private double findDocWeight(int documentID,
-								 RandomAccessFile docWeightsFile, int offset) {
-		try {
-			docWeightsFile.seek(documentID*32+offset);
+
+	public Double getDocWeight(int docID) {
+    	try {
+			docWeights.seek(docID * 32);
 			byte[] buffer = new byte[8];
-			docWeightsFile.read(buffer, 0, buffer.length);
-
+			docWeights.read(buffer, 0, buffer.length);
 			return ByteBuffer.wrap(buffer).getDouble();
-		} catch (IOException ex) {
-			ex.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
 		}
-
-		return 0.0;
+    	
+    	return null;
 	}
 
-	public double getDocWeight(int docID) {
-    	return findDocWeight(docID, docWeights, 0);
+	public Double getDocLength(int docID) {
+		try {
+			docWeights.seek((docID * 32) + 8);
+			byte[] buffer = new byte[8];
+			docWeights.read(buffer, 0, buffer.length);
+			return ByteBuffer.wrap(buffer).getDouble();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		return null;
 	}
 
-	public double getDocLength(int documentID) {
-		return findDocWeight(documentID, docWeights, 8);
+	public Double getDocByteSize(int docID) {
+        try {
+        	docWeights.seek((docID * 32) + 16);
+            byte[] buffer = new byte[8];
+            docWeights.read(buffer, 0, buffer.length);
+            return ByteBuffer.wrap(buffer).getDouble();
+        } catch (IOException ex) {
+            System.out.println(ex.toString());
+        }
+        return null;
 	}
 
-	public double getDocByteSize(int documentID) {
-		return findDocWeight(documentID, docWeights, 16);
+	public Double getAverageTermFreq(int docID) {
+        try {
+        	docWeights.seek((docID * 32) + 24);
+            byte[] buffer = new byte[8];
+            docWeights.read(buffer, 0, buffer.length);
+            return ByteBuffer.wrap(buffer).getDouble();
+        } catch (IOException ex) {
+            System.out.println(ex.toString());
+        }
+        return null;
 	}
 
-	public double getAverageTermFreq(int documentID) {
-		return findDocWeight(documentID, docWeights, 24);
+	public Double getAverageDocLength() {
+        try {
+        	docWeights.seek( mCorpusSize * 32);
+            byte[] buffer = new byte[8];
+            docWeights.read(buffer, 0, buffer.length);
+            return ByteBuffer.wrap(buffer).getDouble();
+        } catch (IOException ex) {
+            System.out.println(ex.toString());
+        }
+        return null;
 	}
-
-	public double getAverageDocLength() {
-		return findDocWeight(mFileNames.size(), docWeights, 0);
-	}
+	
+    public int getCorpusSize() {
+        return mCorpusSize;
+    }
 }

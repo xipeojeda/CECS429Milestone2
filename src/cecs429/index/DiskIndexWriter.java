@@ -20,6 +20,7 @@ import java.util.logging.Logger;
 
 import cecs429.documents.TextFileDocument;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.google.gson.stream.JsonReader;
 
 import cecs429.documents.JsonFileDocument;
@@ -269,15 +270,19 @@ public class  DiskIndexWriter {
 	 */
 	private void indexFile(Path path, SortedSet<String> vocab, Index index) {
 		// TODO Auto-generated method stub
+		String fullPath = path.toString();
+		String modPath = fullPath.replace("index", "");
+		Path newPath = Paths.get(modPath);
+	
         try {
-            Files.walkFileTree(path, new SimpleFileVisitor<Path>() {
+            Files.walkFileTree(newPath, new SimpleFileVisitor<Path>() {
                 int mDocumentID = 0;
-
                 @Override
                 public FileVisitResult preVisitDirectory(Path dir,
                         BasicFileAttributes attrs) {
                     // process the current working directory and subdirectories
                     return FileVisitResult.CONTINUE;
+                    
                 }
 
                 @Override
@@ -289,7 +294,7 @@ public class  DiskIndexWriter {
                         double size = file.toFile().length();
                         docByteSize.add(size);
                         // do the indexing
-                        indexFile(file.toFile(), index, vocab, mDocumentID, "json");
+                        indexFileTypes(file.toFile(), index, vocab, mDocumentID, "json");
                         mDocumentID++;
                     }
                     else if (file.toString().endsWith(".txt")) {
@@ -297,7 +302,7 @@ public class  DiskIndexWriter {
 						double size = file.toFile().length();
 						docByteSize.add(size);
 						// do the indexing
-						indexFile(file.toFile(), index, vocab, mDocumentID, "txt");
+						indexFileTypes(file.toFile(), index, vocab, mDocumentID, "txt");
 						mDocumentID++;
 					}
                     return FileVisitResult.CONTINUE;
@@ -307,7 +312,7 @@ public class  DiskIndexWriter {
                 @Override
                 public FileVisitResult visitFileFailed(Path file,
                         IOException e) {
-
+                	
                     return FileVisitResult.CONTINUE;
                 }
             });
@@ -318,8 +323,8 @@ public class  DiskIndexWriter {
 	/*
 	 * 
 	 */
-	 private int indexFile(File file, Index index, SortedSet<String> vocab, int docID, String fileType) {
-		List<String> terms;
+	 private int indexFileTypes(File file, Index index, SortedSet<String> vocab, int docID, String fileType) {
+		 List<String> terms;
 		try {
 			switch (fileType) {
 				case "json":
@@ -329,17 +334,18 @@ public class  DiskIndexWriter {
 					vocab = new TreeSet<>();
 					docTermFrequency.add(new HashMap<String, Integer>());
 					JsonReader reader = new JsonReader(new FileReader(file));
-					doc = gson.fromJson(reader, JsonFileDocument.class);
-					EnglishTokenStream ets = new EnglishTokenStream(doc.getContent());
+					JsonObject jsonObject = gson.fromJson(reader, JsonObject.class);
+					
+					StringReader stringReader = new StringReader(jsonObject.get("body").toString());
+					EnglishTokenStream ets = new EnglishTokenStream(stringReader);
 					Normalize normal = new Normalize("en"); /////////////////////////////////////////////LANG
 					int position = 0;
 					for(String str : ets.getTokens()) {
 						terms = normal.processToken(str);
-
 						for(String term: terms) {
 							vocab.add(term);
 							pii.addTerm(term, docID, position);
-							int termFrequency = docTermFrequency.get(docID).containsKey(term) ? docTermFrequency.get(docID).get(terms): 0;
+							int termFrequency = docTermFrequency.get(docID).containsKey(term) ? docTermFrequency.get(docID).get(term): 0;
 							docTermFrequency.get(docID).put(term, termFrequency + 1);
 							position++;
 						}
@@ -363,7 +369,7 @@ public class  DiskIndexWriter {
 						for(String term: terms) {
 							vocab.add(term);
 							piiTxt.addTerm(term, docID, positionTxt);
-							int termFrequency = docTermFrequency.get(docID).containsKey(term) ? docTermFrequency.get(docID).get(terms): 0;
+							int termFrequency = docTermFrequency.get(docID).containsKey(term) ? docTermFrequency.get(docID).get(term): 0;
 							docTermFrequency.get(docID).put(term, termFrequency + 1);
 							positionTxt++;
 						}

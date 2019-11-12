@@ -155,11 +155,11 @@ public class GUI  extends JPanel{
 				            //results.append("Title: " + corpus.getDocument(p.getDocumentId()).getTitle() + "\n");
 				            results.append("Positions: " + p.getPositions() + "\n");
 				            results.append("\n");
-				            count++;
-							 */
-							results.append("Doc ID: " + a.getDocID()+"\n");
-							results.append("Accum: " + a.getAccumulator()+"\n");
-				        }
+				            */
+				            
+							
+							results.append("Doc ID: " + a.getDocID()+ " -- " + a.getAccumulator() + "\n");
+						}
 				        // Prints the amount of results returned
 						results.append("Returned: " + count + "\n");
 						
