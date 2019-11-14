@@ -22,7 +22,6 @@ public class RankedRetrieval implements Ranking {
         List<Posting> postList = new ArrayList<>();
         double tftd = 0;
         double wdt = 0;
-        double sumWdt = 0;
        
         for(int i = 0; i < tokens.length; i++)
         {
